@@ -17,9 +17,9 @@
       --fabricio-bg: #2d1b4e;
       --fabricio-border: #8b5cf6;
       
-      /* Azul Van Gogh (Maria) */
-      --maria-bg: #1c3b6f;
-      --maria-border: #3b82f6;
+      /* Azul Fortinho Van Gogh (Maria) */
+      --maria-bg: #1e40af;
+      --maria-border: #60a5fa;
       
       --accent-pink: #ec4899;
     }
@@ -43,7 +43,6 @@
       border-radius: 20px;
       padding: 20px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      overflow: hidden;
     }
 
     .file-dropzone {
@@ -67,10 +66,10 @@
 
     .status-text { text-align: center; font-weight: bold; color: var(--accent-pink); margin-bottom: 15px; }
 
-    /* 1. Contador e Data de Atualização */
+    /* 1. Contador */
     .counter-section {
       text-align: center;
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.2));
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(30, 64, 175, 0.25));
       border: 1px solid var(--border);
       padding: 20px;
       border-radius: 16px;
@@ -82,7 +81,7 @@
     .counter-number { font-size: 2.8rem; font-weight: 800; color: var(--accent-pink); margin: 5px 0; }
     .last-updated { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; font-style: italic; }
 
-    /* 2. Destaques das Declarações */
+    /* 2. Destaques / Caixinha "Te Amo" */
     .highlights-box {
       border: 1px solid var(--border);
       background: rgba(15, 23, 42, 0.6);
@@ -90,9 +89,31 @@
       padding: 15px;
       margin-bottom: 20px;
       display: none;
+      position: relative;
     }
 
-    .highlights-title { font-size: 0.9rem; font-weight: bold; color: var(--text-muted); margin-bottom: 10px; }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .highlights-title { font-size: 0.9rem; font-weight: bold; color: var(--text-muted); }
+
+    .btn-fullscreen {
+      background: var(--border);
+      border: none;
+      color: var(--text-main);
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-fullscreen:hover { background: var(--accent-pink); }
 
     .highlights-list {
       max-height: 220px;
@@ -103,7 +124,26 @@
       padding-right: 5px;
     }
 
-    /* 3. Filtros */
+    /* Modo Fullscreen para Elementos */
+    .fullscreen-mode {
+      position: fixed !important;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 9999;
+      background: var(--bg-color) !important;
+      border-radius: 0 !important;
+      padding: 20px !important;
+      margin: 0 !important;
+      display: flex !important;
+      flex-direction: column;
+    }
+    .fullscreen-mode .highlights-list,
+    .fullscreen-mode .chat-feed {
+      max-height: none !important;
+      height: 100% !important;
+      flex: 1;
+    }
+
+    /* 3. Filtros e Tags */
     .chat-controls {
       display: none;
       flex-direction: column;
@@ -115,7 +155,7 @@
       border: 1px solid var(--border);
     }
 
-    .search-row { display: flex; gap: 10px; }
+    .search-row { display: flex; gap: 10px; align-items: center; }
     
     .input-wrapper { position: relative; flex: 1; }
     .input-wrapper input {
@@ -140,28 +180,64 @@
       border-radius: 6px;
     }
 
-    .tags-row { display: flex; gap: 8px; flex-wrap: wrap; }
-    .tag-btn {
+    /* Botão de Tags Único & Popover */
+    .tags-container { position: relative; }
+
+    .tag-menu-btn {
       background: var(--border);
       border: none;
       color: var(--text-main);
-      padding: 6px 12px;
-      border-radius: 20px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tag-menu-btn:hover { background: var(--accent-pink); }
+
+    .tags-popover {
+      display: none;
+      position: absolute;
+      top: 110%;
+      left: 0;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      z-index: 100;
+      width: 280px;
+    }
+
+    .tags-popover.active { display: grid; }
+
+    .tag-item {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 6px 10px;
+      border-radius: 6px;
       font-size: 0.75rem;
       cursor: pointer;
-      transition: background 0.2s;
+      text-align: left;
     }
-    .tag-btn:hover { background: var(--accent-pink); color: #fff; }
+    .tag-item:hover { background: var(--accent-pink); color: #fff; }
 
     /* 4. Feed de Mensagens */
+    .chat-feed-wrapper { display: none; flex-direction: column; gap: 10px; }
+
     .chat-feed {
-      display: none;
       height: 500px;
       overflow-y: auto;
-      padding: 10px;
+      padding: 12px;
       background: rgba(11, 15, 25, 0.5);
       border-radius: 12px;
       border: 1px solid var(--border);
+      display: flex;
       flex-direction: column;
       gap: 12px;
     }
@@ -241,44 +317,62 @@
 
       <div id="status" class="status-text"></div>
 
-      <!-- Contador em Destaque com Data de Envio -->
+      <!-- 1. Contador -->
       <div id="counterSection" class="counter-section">
         <div class="counter-title">Vezes Aproximadas que dissemos "Te Amo" ❤️</div>
         <div id="counterNumber" class="counter-number">0</div>
         <div id="lastUpdated" class="last-updated"></div>
       </div>
 
-      <!-- Caixinha "Te Amo" -->
+      <!-- 2. Caixinha "Te Amo" -->
       <div id="highlightsBox" class="highlights-box">
-        <div class="highlights-title">💖 Declarações Encontradas no Histórico:</div>
+        <div class="section-header">
+          <div class="highlights-title">💖 Declarações Encontradas no Histórico:</div>
+          <button class="btn-fullscreen" onclick="toggleFullscreen('highlightsBox')">⛶ Tela Cheia</button>
+        </div>
         <div id="highlightsList" class="highlights-list"></div>
       </div>
 
-      <!-- Controles / Lupa / Tags -->
+      <!-- 3. Controles / Lupa / Popover de Tags -->
       <div id="chatControls" class="chat-controls">
         <div class="search-row">
           <div class="input-wrapper">
             <span class="search-icon">🔍</span>
             <input type="text" id="searchInput" placeholder="Pesquisar termo no chat...">
           </div>
+
+          <div class="tags-container">
+            <button class="tag-menu-btn" onclick="toggleTagsMenu(event)">🏷️ Tags <span style="font-size:0.7rem">▼</span></button>
+            <div id="tagsPopover" class="tags-popover">
+              <button class="tag-item" onclick="applyTag('te amo')">❤️ Te Amo</button>
+              <button class="tag-item" onclick="applyTag('saudade')">🥺 Saudades</button>
+              <button class="tag-item" onclick="applyTag('bom dia')">☀️ Bom dia</button>
+              <button class="tag-item" onclick="applyTag('boa noite')">🌙 Boa noite</button>
+              <button class="tag-item" onclick="applyTag('linda')">😍 Linda</button>
+              <button class="tag-item" onclick="applyTag('lindo')">🥰 Lindo</button>
+              <button class="tag-item" onclick="applyTag('kkkk')">😂 Kkkk</button>
+              <button class="tag-item" onclick="applyTag('fotos')">📷 Fotos</button>
+              <button class="tag-item" onclick="applyTag('audio')">🎙️ Áudio</button>
+              <button class="tag-item" onclick="applyTag('beijo')">😘 Beijos</button>
+            </div>
+          </div>
         </div>
 
         <div class="date-row">
           <label>De: <input type="date" id="dateStart"></label>
           <label>Até: <input type="date" id="dateEnd"></label>
-        </div>
-
-        <div class="tags-row">
-          <button class="tag-btn" onclick="applyTag('te amo')">❤️ Te Amo</button>
-          <button class="tag-btn" onclick="applyTag('saudade')">🥺 Saudades</button>
-          <button class="tag-btn" onclick="applyTag('bom dia')">☀️ Bom dia</button>
-          <button class="tag-btn" onclick="applyTag('boa noite')">🌙 Boa noite</button>
-          <button class="tag-btn" onclick="clearFilters()">🔄 Limpar Filtros</button>
+          <button class="btn-fullscreen" style="margin-left:auto" onclick="clearFilters()">🔄 Limpar</button>
         </div>
       </div>
 
-      <!-- Feed do Chat -->
-      <div id="chatFeed" class="chat-feed"></div>
+      <!-- 4. Feed do Chat com Tela Cheia -->
+      <div id="chatFeedWrapper" class="chat-feed-wrapper">
+        <div class="section-header">
+          <div class="highlights-title">💬 Histórico Completo de Conversas:</div>
+          <button class="btn-fullscreen" onclick="toggleFullscreen('chatFeedWrapper')">⛶ Tela Cheia</button>
+        </div>
+        <div id="chatFeed" class="chat-feed"></div>
+      </div>
 
     </div>
   </div>
@@ -320,11 +414,10 @@
           parseWhatsAppText(text);
           renderDashboard();
           
-          // Registrar data e hora atual do upload
           const now = new Date();
           const dateFormatted = now.toLocaleDateString('pt-BR');
           const timeFormatted = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-          document.getElementById('lastUpdated').innerText = `Histórico atualizado em ${dateFormatted} às ${timeFormatted}`;
+          document.getElementById('lastUpdated').innerText = `Histórico carregado em ${dateFormatted} às ${timeFormatted}`;
           
           status.innerText = "";
         } catch (err) {
@@ -399,7 +492,7 @@
       
       document.getElementById('highlightsBox').style.display = 'block';
       document.getElementById('chatControls').style.display = 'flex';
-      document.getElementById('chatFeed').style.display = 'flex';
+      document.getElementById('chatFeedWrapper').style.display = 'flex';
       
       applyFilters();
     }
@@ -478,6 +571,34 @@
       }
     }
 
+    function toggleFullscreen(elementId) {
+      const el = document.getElementById(elementId);
+      el.classList.toggle('fullscreen-mode');
+    }
+
+    function toggleTagsMenu(e) {
+      e.stopPropagation();
+      const popover = document.getElementById('tagsPopover');
+      popover.classList.toggle('active');
+    }
+
+    document.addEventListener('click', () => {
+      document.getElementById('tagsPopover').classList.remove('active');
+    });
+
+    function applyTag(tag) {
+      document.getElementById('searchInput').value = tag;
+      document.getElementById('tagsPopover').classList.remove('active');
+      applyFilters();
+    }
+
+    function clearFilters() {
+      document.getElementById('searchInput').value = "";
+      document.getElementById('dateStart').value = "";
+      document.getElementById('dateEnd').value = "";
+      applyFilters();
+    }
+
     function getAuthorClass(author) {
       const name = author.toLowerCase();
       if (name.includes('fabricio') || name.includes('fabrício')) return 'msg-fabricio';
@@ -498,18 +619,6 @@
     document.getElementById('searchInput').addEventListener('input', applyFilters);
     document.getElementById('dateStart').addEventListener('change', applyFilters);
     document.getElementById('dateEnd').addEventListener('change', applyFilters);
-
-    function applyTag(tag) {
-      document.getElementById('searchInput').value = tag;
-      applyFilters();
-    }
-
-    function clearFilters() {
-      document.getElementById('searchInput').value = "";
-      document.getElementById('dateStart').value = "";
-      document.getElementById('dateEnd').value = "";
-      applyFilters();
-    }
   </script>
 
 </body>
