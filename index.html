@@ -15,11 +15,9 @@
       --text-muted: #8a7573;
       --bg-main: #fff3f2;
       
-      /* Fabricio (Rosa Seco Suave) */
       --fabricio-bg: #f5e8e6;
       --fabricio-border: #d4a39b;
       
-      /* Maria (Azul Fortinho Van Gogh) */
       --maria-bg: #1e40af;
       --maria-border: #60a5fa;
       
@@ -98,7 +96,6 @@
 
     .status-text { text-align: center; font-weight: bold; color: var(--primary); margin-bottom: 15px; }
 
-    /* 1. Contador */
     .counter-section {
       text-align: center;
       background: linear-gradient(135deg, rgba(230, 179, 168, 0.25), rgba(140, 98, 93, 0.1));
@@ -113,7 +110,6 @@
     .counter-number { font-size: 2.8rem; font-weight: 800; color: var(--primary); margin: 5px 0; }
     .last-updated { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; font-style: italic; }
 
-    /* Cabeçalho de Seção */
     .section-header {
       display: flex;
       justify-content: space-between;
@@ -139,7 +135,6 @@
     }
     .btn-fullscreen:hover { background: var(--primary); color: #fff; }
 
-    /* 2. Caixinha "Te Amo" */
     .highlights-box {
       border: 1px solid rgba(230, 179, 168, 0.5);
       background: #fffbfb;
@@ -158,7 +153,6 @@
       padding-right: 5px;
     }
 
-    /* Fullscreen Mode */
     .fullscreen-mode {
       position: fixed !important;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -179,7 +173,6 @@
       flex: 1;
     }
 
-    /* 3. Área do Chat Completo */
     .chat-section {
       display: none;
       flex-direction: column;
@@ -222,7 +215,6 @@
       border-radius: 8px;
     }
 
-    /* Popover Tags */
     .tags-container { position: relative; }
 
     .tag-menu-btn {
@@ -271,7 +263,6 @@
     }
     .tag-item:hover { background: var(--primary); color: #fff; }
 
-    /* 4. Feed de Mensagens */
     .chat-feed {
       height: 500px;
       overflow-y: auto;
@@ -363,7 +354,7 @@
       </div>
 
       <div class="cloud-actions">
-        <button id="btnSaveCloud" class="btn-cloud" style="display: none;">☁️ Salvar Histórico na Nuvem</button>
+        <button id="btnSaveCloud" class="btn-cloud" style="display: none;">☁️ Salvar / Substituir Histórico na Nuvem</button>
         <button id="btnDeleteCloud" class="btn-cloud btn-cloud-danger" style="display: none;">🗑️ Excluir Histórico da Nuvem</button>
       </div>
 
@@ -434,6 +425,7 @@
     import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
+    // Configurações do Firebase preenchidas com suas credenciais completas
     const firebaseConfig = {
       apiKey: "AIzaSyAEyJHxEP96ZpSYfAgNO4wdQZIiArseGm4",
       authDomain: "nosso-canto-5d714.firebaseapp.com",
@@ -461,7 +453,6 @@
     const btnSaveCloud = document.getElementById('btnSaveCloud');
     const btnDeleteCloud = document.getElementById('btnDeleteCloud');
 
-    // Verificar se existe histórico salvo na nuvem ao carregar a página
     window.addEventListener('DOMContentLoaded', async () => {
       checkCloudHistory();
     });
@@ -477,6 +468,7 @@
           statusEl.innerText = "Carregando histórico da nuvem...";
           
           const response = await fetch(data.fileUrl);
+          if(!response.ok) throw new Error("Erro na rede ou o arquivo foi removido da Storage.");
           const text = await response.text();
 
           parseWhatsAppText(text);
@@ -486,7 +478,6 @@
           document.getElementById('lastUpdated').innerText = `Histórico carregado da nuvem (${data.dataSalvamento || 'Anteriormente'})`;
           
           btnDeleteCloud.style.display = "inline-block";
-          btnSaveCloud.style.display = "none";
           statusEl.innerText = "";
         } else {
           statusEl.innerText = "";
@@ -538,34 +529,57 @@
       }, 50);
     });
 
-    // Salvar na Nuvem
+    // Salvar ou Substituir na Nuvem
     btnSaveCloud.addEventListener('click', async () => {
-      if (!currentFileObj) return;
+      if (!currentFileObj) {
+        alert("Por favor, selecione um arquivo de conversa primeiro!");
+        return;
+      }
+
       try {
         statusEl.innerText = "Enviando arquivo para a nuvem... Aguarde.";
         btnSaveCloud.disabled = true;
 
-        const storageRef = ref(storage, `historico/${Date.now()}_${currentFileObj.name}`);
+        // 1. Apaga o histórico antigo se já existir
+        const docRef = doc(db, "historico_whatsapp", "chat_principal");
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const oldData = docSnap.data();
+          if (oldData.storagePath) {
+            const oldStorageRef = ref(storage, oldData.storagePath);
+            await deleteObject(oldStorageRef).catch(() => {});
+          }
+        }
+
+        // 2. Faz upload do novo arquivo
+        const timestamp = Date.now();
+        const safeName = currentFileObj.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+        const storagePath = `historico/${timestamp}_${safeName}`;
+        const storageRef = ref(storage, storagePath);
+
         await uploadBytes(storageRef, currentFileObj);
         const downloadURL = await getDownloadURL(storageRef);
 
         const now = new Date();
         const dataSalvamento = `${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 
-        await setDoc(doc(db, "historico_whatsapp", "chat_principal"), {
+        // 3. Atualiza o registro principal no Firestore
+        await setDoc(docRef, {
           fileName: currentFileObj.name,
           fileUrl: downloadURL,
-          storagePath: storageRef.fullPath,
+          storagePath: storagePath,
           dataSalvamento: dataSalvamento
         });
 
-        alert("Histórico salvo na nuvem com sucesso! ❤️");
+        alert("Histórico salvo/atualizado na nuvem com sucesso! ❤️");
         btnSaveCloud.style.display = "none";
         btnDeleteCloud.style.display = "inline-block";
+        document.getElementById('dropzoneText').innerText = `☁️ Histórico Ativo: ${currentFileObj.name}`;
         statusEl.innerText = "";
       } catch (err) {
         console.error("Erro ao salvar na nuvem:", err);
-        alert("Erro ao salvar o arquivo na nuvem.");
+        alert("Erro ao salvar no Firebase. Verifique se as Regras de Segurança do Firebase Firestore e Storage estão configuradas para leitura/escrita.");
         statusEl.innerText = "";
       } finally {
         btnSaveCloud.disabled = false;
@@ -606,7 +620,7 @@
     function parseWhatsAppText(text) {
       parsedMessages = [];
       const lines = text.split('\n');
-      const msgRegex = /^\[?(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s(\d{1,2}:\d{2}(?::\d{2})?)\]?\s-?\s?([^:]+):\s(.*)$/;
+      const msgRegex = /^\[?(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s(\d{1,2}:\d{2}(?::\d{2})?)\]?\s*[\-–—]?\s*([^:]+):\s*(.*)$/;
 
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
@@ -615,7 +629,6 @@
         if (match) {
           const content = match[4].trim();
 
-          // REMOÇÃO DE MÍDIA OCULTA / ARQUIVO OCULTO
           if (/<mídia\s+oculta>|<arquivo\s+de\s+mídia\s+oculto>|<media\s+omitted>/gi.test(content)) {
             continue;
           }
@@ -650,6 +663,7 @@
       const loveMessages = [];
 
       parsedMessages.forEach(msg => {
+        masterLoveRegex.lastIndex = 0;
         const matches = msg.content.match(masterLoveRegex);
         if (matches) {
           loveCount += matches.length;
@@ -692,6 +706,7 @@
         let matchesText = true;
         if (searchTerm) {
           if (searchTerm === 'te amo') {
+            masterLoveRegex.lastIndex = 0;
             matchesText = masterLoveRegex.test(msg.content);
           } else {
             matchesText = msg.content.toLowerCase().includes(searchTerm);
