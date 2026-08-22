@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contador de "Te Amo" no WhatsApp</title>
+  <!-- Biblioteca para ler arquivos .zip diretamente no navegador -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; text-align: center; }
+    .card { border: 1px solid #ccc; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    input[type="file"] { margin: 20px 0; }
+    .result { font-size: 1.2rem; font-weight: bold; color: #2e7d32; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Contador de Amor do WhatsApp ❤️</h2>
+    <p>Selecione o arquivo da conversa exportada (.txt ou .zip):</p>
+    
+    <input type="file" id="fileInput" accept=".txt,.zip">
+    <div id="status"></div>
+    <div id="result" class="result"></div>
+  </div>
+
+  <script>
+    document.getElementById('fileInput').addEventListener('change', async function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const status = document.getElementById('status');
+      const result = document.getElementById('result');
+      status.innerText = "Processando arquivo...";
+      result.innerText = "";
+
+      try {
+        let text = "";
+
+        if (file.name.endsWith('.zip')) {
+          const zip = new JSZip();
+          const zipContent = await zip.loadAsync(file);
+          // Encontra o primeiro arquivo .txt dentro do ZIP
+          const txtFile = Object.keys(zipContent.files).find(name => name.endsWith('.txt'));
+          
+          if (!txtFile) {
+            status.innerText = "Nenhum arquivo de texto encontrado no arquivo .zip.";
+            return;
+          }
+          text = await zipContent.files[txtFile].async('string');
+        } else {
+          text = await file.text();
+        }
+
+        // Expressão regular para buscar "te amo" ou "eu te amo" (case-insensitive)
+        const regex = /\b(eu\s+)?te\s+amo\b/gi;
+        const matches = text.match(regex);
+        const count = matches ? matches.length : 0;
+
+        status.innerText = "Análise concluída!";
+        result.innerText = `Vocês disseram "te amo" ou "eu te amo" ${count} vezes nessa conversa!`;
+
+      } catch (err) {
+        status.innerText = "Erro ao ler o arquivo. Certifique-se de ser um arquivo exportado válido.";
+        console.error(err);
+      }
+    });
+  </script>
+
+</body>
+</html>
