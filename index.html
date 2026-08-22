@@ -13,7 +13,6 @@
       --text-main: #f1f5f9;
       --text-muted: #94a3b8;
       
-      /* Cores das Mensagens */
       --fabricio-bg: #2d1b4e;
       --fabricio-border: #8b5cf6;
       --maria-bg: #102a45;
@@ -22,14 +21,13 @@
       --accent-pink: #ec4899;
     }
 
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-main);
-      margin: 0;
-      padding: 20px;
+      padding: 16px;
       display: flex;
       justify-content: center;
     }
@@ -40,14 +38,15 @@
       background-color: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 20px;
-      padding: 24px;
+      padding: 20px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
     }
 
     .file-dropzone {
       border: 2px dashed var(--accent-pink);
       border-radius: 14px;
-      padding: 25px 20px;
+      padding: 20px;
       text-align: center;
       cursor: pointer;
       background: rgba(236, 72, 153, 0.05);
@@ -65,47 +64,48 @@
 
     .status-text { text-align: center; font-weight: bold; color: var(--accent-pink); margin-bottom: 15px; }
 
-    /* Seção Superior: Contador */
+    /* 1. Contador */
     .counter-section {
       text-align: center;
       background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(29, 78, 216, 0.15));
       border: 1px solid var(--border);
       padding: 20px;
       border-radius: 16px;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
       display: none;
     }
 
-    .counter-title { font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
-    .counter-number { font-size: 3.2rem; font-weight: 800; color: var(--accent-pink); margin: 5px 0; }
+    .counter-title { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+    .counter-number { font-size: 2.8rem; font-weight: 800; color: var(--accent-pink); margin: 5px 0; }
 
-    /* Caixa de Destaque para "Te Amo" */
+    /* 2. Destaques das Declarações */
     .highlights-box {
       border: 1px solid var(--border);
       background: rgba(15, 23, 42, 0.6);
       border-radius: 14px;
       padding: 15px;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
       display: none;
     }
 
-    .highlights-title { font-size: 0.95rem; font-weight: bold; color: var(--text-muted); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .highlights-title { font-size: 0.9rem; font-weight: bold; color: var(--text-muted); margin-bottom: 10px; }
 
     .highlights-list {
-      max-height: 200px;
+      max-height: 220px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
+      padding-right: 5px;
     }
 
-    /* Filtros e Busca para o Chat Completo */
+    /* 3. Filtros */
     .chat-controls {
       display: none;
       flex-direction: column;
       gap: 12px;
       margin-bottom: 20px;
-      background: rgba(0, 0, 0, 0.2);
+      background: rgba(0, 0, 0, 0.25);
       padding: 16px;
       border-radius: 14px;
       border: 1px solid var(--border);
@@ -127,7 +127,7 @@
 
     .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); opacity: 0.6; }
 
-    .date-row { display: flex; gap: 10px; align-items: center; font-size: 0.85rem; color: var(--text-muted); }
+    .date-row { display: flex; gap: 10px; align-items: center; font-size: 0.85rem; color: var(--text-muted); flex-wrap: wrap; }
     .date-row input {
       background: var(--bg-color);
       border: 1px solid var(--border);
@@ -136,7 +136,7 @@
       border-radius: 6px;
     }
 
-    .tags-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    .tags-row { display: flex; gap: 8px; flex-wrap: wrap; }
     .tag-btn {
       background: var(--border);
       border: none;
@@ -145,32 +145,35 @@
       border-radius: 20px;
       font-size: 0.75rem;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: background 0.2s;
     }
     .tag-btn:hover { background: var(--accent-pink); color: #fff; }
 
-    /* Feed do Chat Completo */
+    /* 4. Feed de Mensagens sem Vazamento */
     .chat-feed {
       display: none;
-      max-height: 550px;
+      height: 500px;
       overflow-y: auto;
-      padding-right: 8px;
-      display: flex;
+      padding: 10px;
+      background: rgba(11, 15, 25, 0.5);
+      border-radius: 12px;
+      border: 1px solid var(--border);
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
 
     .msg-bubble {
-      max-width: 80%;
+      max-width: 85%;
       padding: 10px 14px;
       border-radius: 12px;
       font-size: 0.9rem;
       line-height: 1.4;
-      position: relative;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
       word-break: break-word;
+      hyphens: auto;
     }
 
-    /* Visual Fabricio: Roxinho Cósmico */
     .msg-fabricio {
       align-self: flex-end;
       background-color: var(--fabricio-bg);
@@ -178,7 +181,6 @@
       border-bottom-right-radius: 2px;
     }
 
-    /* Visual Maria: Azul Van Gogh */
     .msg-maria {
       align-self: flex-start;
       background-color: var(--maria-bg);
@@ -186,7 +188,6 @@
       border-bottom-left-radius: 2px;
     }
 
-    /* Outras mensagens do sistema ou indefinidas */
     .msg-other {
       align-self: center;
       background-color: #1e293b;
@@ -201,16 +202,28 @@
       margin-bottom: 4px;
       display: flex;
       justify-content: space-between;
-      gap: 12px;
+      gap: 8px;
       opacity: 0.8;
     }
 
     .highlight {
-      background-color: rgba(236, 72, 153, 0.4);
+      background-color: rgba(236, 72, 153, 0.45);
       color: #fff;
       font-weight: bold;
       padding: 1px 4px;
       border-radius: 3px;
+    }
+
+    .load-more-btn {
+      background: var(--border);
+      color: var(--text-main);
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 10px 0;
+      font-size: 0.85rem;
+      align-self: center;
     }
   </style>
 </head>
@@ -225,24 +238,24 @@
 
       <div id="status" class="status-text"></div>
 
-      <!-- 1. Contador em Destaque -->
+      <!-- Contador em Destaque -->
       <div id="counterSection" class="counter-section">
         <div class="counter-title">Vezes Aproximadas que dissemos "Te Amo" ❤️</div>
         <div id="counterNumber" class="counter-number">0</div>
       </div>
 
-      <!-- 2. Caixinha de Mensagens "Te Amo" Encontradas -->
+      <!-- Caixinha "Te Amo" -->
       <div id="highlightsBox" class="highlights-box">
         <div class="highlights-title">💖 Declarações Encontradas no Histórico:</div>
         <div id="highlightsList" class="highlights-list"></div>
       </div>
 
-      <!-- 3. Controles de Busca e Filtros para o Chat -->
+      <!-- Controles / Lupa / Tags -->
       <div id="chatControls" class="chat-controls">
         <div class="search-row">
           <div class="input-wrapper">
             <span class="search-icon">🔍</span>
-            <input type="text" id="searchInput" placeholder="Pesquisar termo no chat completo...">
+            <input type="text" id="searchInput" placeholder="Pesquisar termo no chat...">
           </div>
         </div>
 
@@ -260,7 +273,7 @@
         </div>
       </div>
 
-      <!-- 4. Chat Completo com Rolagem -->
+      <!-- Feed do Chat Otimizado -->
       <div id="chatFeed" class="chat-feed"></div>
 
     </div>
@@ -268,8 +281,10 @@
 
   <script>
     let parsedMessages = [];
+    let filteredMessages = [];
+    let currentPage = 1;
+    const PAGE_SIZE = 100;
 
-    // Regex ultra-precisa para declarações com intensificação
     const patternTE_AMO = /\b(?:e+u+[\s,]*)?t+e+[\s,]+a+m+o+\b/gi;
     const patternAMO_VOCE = /\ba+m+o+[\s,]+(?:v+o+c+e+|v+c+)\b/gi;
     const masterLoveRegex = new RegExp(`${patternTE_AMO.source}|${patternAMO_VOCE.source}`, 'gi');
@@ -279,55 +294,48 @@
       if (!file) return;
 
       const status = document.getElementById('status');
-      const dropzoneText = document.getElementById('dropzoneText');
-      dropzoneText.innerText = `📄 ${file.name}`;
-      status.innerText = "Lendo e organizando histórico...";
+      document.getElementById('dropzoneText').innerText = `📄 ${file.name}`;
+      status.innerText = "Processando arquivo...";
 
-      try {
-        let text = "";
-        if (file.name.endsWith('.zip')) {
-          const zip = new JSZip();
-          const zipContent = await zip.loadAsync(file);
-          const txtFile = Object.keys(zipContent.files).find(name => name.endsWith('.txt'));
-          if (!txtFile) {
-            status.innerText = "Arquivo de texto não encontrado dentro do .zip.";
-            return;
+      // Usando setTimeout para evitar congelar a interface durante a leitura
+      setTimeout(async () => {
+        try {
+          let text = "";
+          if (file.name.endsWith('.zip')) {
+            const zip = new JSZip();
+            const zipContent = await zip.loadAsync(file);
+            const txtFile = Object.keys(zipContent.files).find(name => name.endsWith('.txt'));
+            if (!txtFile) {
+              status.innerText = "Arquivo .txt não encontrado no .zip.";
+              return;
+            }
+            text = await zipContent.files[txtFile].async('string');
+          } else {
+            text = await file.text();
           }
-          text = await zipContent.files[txtFile].async('string');
-        } else {
-          text = await file.text();
+
+          parseWhatsAppText(text);
+          renderDashboard();
+          status.innerText = "";
+        } catch (err) {
+          status.innerText = "Erro ao processar o arquivo.";
+          console.error(err);
         }
-
-        parseWhatsAppText(text);
-        renderDashboard();
-        status.innerText = "";
-
-      } catch (err) {
-        status.innerText = "Erro ao processar o arquivo. Verifique se o formato é válido.";
-        console.error(err);
-      }
+      }, 50);
     });
 
-    // Função de tratamento do texto bruto exportado do WhatsApp
     function parseWhatsAppText(text) {
       parsedMessages = [];
       const lines = text.split('\n');
-      
-      // Regex genérica para extrair Data, Hora, Autor e Conteúdo da Mensagem
       const msgRegex = /^\[?(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s(\d{1,2}:\d{2}(?::\d{2})?)\]?\s-?\s?([^:]+):\s(.*)$/;
 
-      lines.forEach(line => {
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
         const match = line.match(msgRegex);
         if (match) {
-          const dateStr = match[1];
-          const timeStr = match[2];
-          const authorStr = match[3].trim();
-          const contentStr = match[4].trim();
-
-          // Converter data DD/MM/AAAA para AAAA-MM-DD
-          const dateParts = dateStr.split('/');
+          const dateParts = match[1].split('/');
           let isoDate = "";
-          if(dateParts.length === 3) {
+          if (dateParts.length === 3) {
             let year = dateParts[2].length === 2 ? '20' + dateParts[2] : dateParts[2];
             let month = dateParts[1].padStart(2, '0');
             let day = dateParts[0].padStart(2, '0');
@@ -336,16 +344,15 @@
 
           parsedMessages.push({
             date: isoDate,
-            dateRaw: dateStr,
-            time: timeStr,
-            author: authorStr,
-            content: contentStr
+            dateRaw: match[1],
+            time: match[2],
+            author: match[3].trim(),
+            content: match[4].trim()
           });
         } else if (parsedMessages.length > 0) {
-          // Quebras de linha pertencentes à mensagem anterior
           parsedMessages[parsedMessages.length - 1].content += "\n" + line.trim();
         }
-      });
+      }
     }
 
     function renderDashboard() {
@@ -360,11 +367,9 @@
         }
       });
 
-      // 1. Atualizar Contador
       document.getElementById('counterNumber').innerText = loveCount;
       document.getElementById('counterSection').style.display = 'block';
 
-      // 2. Renderizar Caixinha "Te Amo"
       const highlightsList = document.getElementById('highlightsList');
       highlightsList.innerHTML = "";
       
@@ -374,33 +379,27 @@
         item.className = `msg-bubble ${getAuthorClass(msg.author)}`;
         item.innerHTML = `
           <div class="msg-header">
-            <span>${msg.author}</span>
+            <span>${escapeHTML(msg.author)}</span>
             <span>${msg.dateRaw} ${msg.time}</span>
           </div>
           <div>${highlightedContent}</div>
         `;
         highlightsList.appendChild(item);
       });
+      
       document.getElementById('highlightsBox').style.display = 'block';
-
-      // 3. Exibir Controles e Chat
       document.getElementById('chatControls').style.display = 'flex';
       document.getElementById('chatFeed').style.display = 'flex';
       
-      filterAndRenderChat();
+      applyFilters();
     }
 
-    // Filtra e exibe o chat completo
-    function filterAndRenderChat() {
+    function applyFilters() {
       const searchTerm = document.getElementById('searchInput').value.toLowerCase();
       const dateStart = document.getElementById('dateStart').value;
       const dateEnd = document.getElementById('dateEnd').value;
-      const chatFeed = document.getElementById('chatFeed');
 
-      chatFeed.innerHTML = "";
-
-      const filtered = parsedMessages.filter(msg => {
-        // Filtro de Texto
+      filteredMessages = parsedMessages.filter(msg => {
         let matchesText = true;
         if (searchTerm) {
           if (searchTerm === 'te amo') {
@@ -410,7 +409,6 @@
           }
         }
 
-        // Filtro de Data
         let matchesDate = true;
         if (dateStart && msg.date < dateStart) matchesDate = false;
         if (dateEnd && msg.date > dateEnd) matchesDate = false;
@@ -418,13 +416,30 @@
         return matchesText && matchesDate;
       });
 
-      filtered.forEach(msg => {
+      currentPage = 1;
+      const chatFeed = document.getElementById('chatFeed');
+      chatFeed.innerHTML = "";
+      renderPage();
+    }
+
+    function renderPage() {
+      const chatFeed = document.getElementById('chatFeed');
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      
+      const start = (currentPage - 1) * PAGE_SIZE;
+      const end = currentPage * PAGE_SIZE;
+      const pageItems = filteredMessages.slice(start, end);
+
+      const oldButton = document.getElementById('loadMoreBtn');
+      if (oldButton) oldButton.remove();
+
+      pageItems.forEach(msg => {
         const item = document.createElement('div');
         item.className = `msg-bubble ${getAuthorClass(msg.author)}`;
         
-        let displayContent = msg.content;
+        let displayContent = escapeHTML(msg.content);
         if (searchTerm && searchTerm !== 'te amo') {
-          const searchRegex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+          const searchRegex = new RegExp(`(${escapeRegExp(searchTerm)})`, 'gi');
           displayContent = displayContent.replace(searchRegex, `<span class="highlight">$1</span>`);
         } else if (searchTerm === 'te amo') {
           displayContent = displayContent.replace(masterLoveRegex, match => `<span class="highlight">${match}</span>`);
@@ -432,40 +447,58 @@
 
         item.innerHTML = `
           <div class="msg-header">
-            <span>${msg.author}</span>
+            <span>${escapeHTML(msg.author)}</span>
             <span>${msg.dateRaw} ${msg.time}</span>
           </div>
           <div>${displayContent}</div>
         `;
         chatFeed.appendChild(item);
       });
+
+      if (end < filteredMessages.length) {
+        const btn = document.createElement('button');
+        btn.id = 'loadMoreBtn';
+        btn.className = 'load-more-btn';
+        btn.innerText = `Carregar mais mensagens (${filteredMessages.length - end} restantes)`;
+        btn.onclick = () => {
+          currentPage++;
+          renderPage();
+        };
+        chatFeed.appendChild(btn);
+      }
     }
 
     function getAuthorClass(author) {
       const name = author.toLowerCase();
-      if (name.includes('fabricio') || name.includes('fabrício')) {
-        return 'msg-fabricio';
-      } else if (name.includes('maria')) {
-        return 'msg-maria';
-      }
+      if (name.includes('fabricio') || name.includes('fabrício')) return 'msg-fabricio';
+      if (name.includes('maria')) return 'msg-maria';
       return 'msg-other';
     }
 
-    // Handlers de Eventos dos Filtros
-    document.getElementById('searchInput').addEventListener('input', filterAndRenderChat);
-    document.getElementById('dateStart').addEventListener('change', filterAndRenderChat);
-    document.getElementById('dateEnd').addEventListener('change', filterAndRenderChat);
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"]/g, 
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+      );
+    }
+
+    function escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    document.getElementById('dateStart').addEventListener('change', applyFilters);
+    document.getElementById('dateEnd').addEventListener('change', applyFilters);
 
     function applyTag(tag) {
       document.getElementById('searchInput').value = tag;
-      filterAndRenderChat();
+      applyFilters();
     }
 
     function clearFilters() {
       document.getElementById('searchInput').value = "";
       document.getElementById('dateStart').value = "";
       document.getElementById('dateEnd').value = "";
-      filterAndRenderChat();
+      applyFilters();
     }
   </script>
 
