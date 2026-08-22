@@ -61,7 +61,6 @@
       opacity: 0; cursor: pointer;
     }
 
-    /* Container de Busca com Lupa */
     .search-box {
       display: flex;
       gap: 10px;
@@ -152,7 +151,7 @@
     }
 
     .highlight {
-      background-color: rgba(236, 72, 153, 0.25);
+      background-color: rgba(236, 72, 153, 0.35);
       color: #f472b6;
       font-weight: bold;
       padding: 2px 6px;
@@ -167,14 +166,13 @@
   <div class="container">
     <div class="card">
       <h1>Lupa do Amor 🔍❤️</h1>
-      <p class="subtitle">Faça upload da conversa e busque por declarações de amor, inclusive com repetições de letras!</p>
+      <p class="subtitle">Faça upload da conversa e busque por declarações de amor com qualquer variação de intensidade!</p>
 
       <div class="file-dropzone">
         <span id="dropzoneText">📁 Selecione a conversa exportada (.txt ou .zip)</span>
         <input type="file" id="fileInput" accept=".txt,.zip">
       </div>
 
-      <!-- Barra de Pesquisa -->
       <div id="searchBox" class="search-box">
         <div class="input-wrapper">
           <span class="search-icon">🔍</span>
@@ -188,7 +186,7 @@
       <div id="statsGrid" class="stats-grid">
         <div class="stat-card">
           <div id="totalCount" class="stat-number">0</div>
-          <div class="stat-label" id="statLabel">Resultados encontrados</div>
+          <div class="stat-label">Declarações Encontradas</div>
         </div>
       </div>
 
@@ -227,8 +225,6 @@
 
         status.innerText = "Arquivo carregado! Clique na lupa para buscar.";
         searchBox.style.display = "flex";
-        
-        // Executa a busca inicial automaticamente com "eu te amo"
         performSearch();
 
       } catch (err) {
@@ -260,13 +256,16 @@
       messagesList.innerHTML = "";
 
       let regexPattern;
+      const queryLower = query.toLowerCase();
 
-      // Se a pesquisa for relacionada a "te amo", usa o filtro inteligente de intensidade
-      const cleanQuery = query.toLowerCase().replace(/\s+/g, '');
-      if (cleanQuery.includes('teamo') || cleanQuery.includes('euteamo')) {
-        regexPattern = /\b(e+u+[\s,]*)?t+e+[\s,]+a+m+o+\b/gi;
+      // Se a busca contiver termos comuns de amor, ativa a captura universal de intensidade
+      if (queryLower.includes('amo') || queryLower.includes('te')) {
+        // Padrão que aceita:
+        // (opcional): e+u+ (euuu, eeeuu, etc)
+        // t+e+ (teee, ttte, etc)
+        // a+m+o+ (amooo, aammmooo, etc)
+        regexPattern = /(?:[eéèé]+[uú]+[\s,]*)?[tT]+[eéèé]+[\s,]+[aáàâãá]+[mM]+[oóòôõó]+/gi;
       } else {
-        // Para qualquer outra pesquisa padrão
         regexPattern = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
       }
 
@@ -275,10 +274,9 @@
       let htmlList = "";
 
       lines.forEach(line => {
-        if (regexPattern.test(line)) {
-          const matchesInLine = line.match(regexPattern);
-          if (matchesInLine) matchesCount += matchesInLine.length;
-
+        const matchesInLine = line.match(regexPattern);
+        if (matchesInLine) {
+          matchesCount += matchesInLine.length;
           const highlightedText = line.replace(regexPattern, match => `<span class="highlight">${match}</span>`);
           htmlList += `<div class="message-item">${highlightedText}</div>`;
         }
@@ -289,7 +287,7 @@
       statsGrid.style.display = "grid";
 
       if (matchesCount > 0) {
-        messagesList.innerHTML = `<h3 style="margin-bottom:15px; font-size:1rem; color:var(--text-muted)">Mensagens com "${query}":</h3>` + htmlList;
+        messagesList.innerHTML = `<h3 style="margin-bottom:15px; font-size:1rem; color:var(--text-muted)">Todas as variações encontradas:</h3>` + htmlList;
         messagesList.style.display = "block";
       } else {
         messagesList.style.display = "none";
