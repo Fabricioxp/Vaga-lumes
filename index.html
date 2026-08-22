@@ -75,14 +75,16 @@
       transition: background 0.2s;
     }
     .btn-cloud:hover { background-color: #734f4b; }
+    .btn-cloud:disabled { opacity: 0.6; cursor: not-allowed; }
     .btn-cloud-danger { background-color: #d9534f; }
     .btn-cloud-danger:hover { background-color: #c9302c; }
-    .status-text { text-align: center; font-weight: bold; color: var(--primary); margin-bottom: 8px; font-size: 0.9rem; }
+    .status-text { text-align: center; font-weight: bold; color: var(--primary); margin-bottom: 10px; font-size: 0.9rem; min-height: 20px; }
+    .error-text { color: #d9534f !important; }
     
     /* BARRA DE PROGRESSO */
     .progress-container {
       width: 100%;
-      background-color: #f0e2e0;
+      background-color: #e2d1cf;
       border-radius: 12px;
       overflow: hidden;
       margin-bottom: 20px;
@@ -95,7 +97,7 @@
       height: 100%;
       width: 0%;
       background: linear-gradient(90deg, #a68580, #8c625d);
-      transition: width 0.3s ease;
+      transition: width 0.15s linear;
       border-radius: 12px;
     }
     .progress-text {
@@ -103,7 +105,7 @@
       top: 0; left: 0; width: 100%; height: 100%;
       display: flex; align-items: center; justify-content: center;
       font-size: 0.8rem; font-weight: bold; color: #ffffff;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.6);
     }
 
     .counter-section {
@@ -180,7 +182,7 @@
 
       <div id="status" class="status-text"></div>
 
-      <!-- BARRA DE PROGRESSO COM PORCENTAGEM -->
+      <!-- BARRA DE PROGRESSO -->
       <div id="progressContainer" class="progress-container">
         <div id="progressBar" class="progress-bar"></div>
         <div id="progressText" class="progress-text">0%</div>
@@ -246,7 +248,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // CONFIGURAÇÃO DO SEU FIREBASE
+    // CONFIGURAÇÃO FIREBASE
     const firebaseConfig = {
       apiKey: "AIzaSyCoXUPYC0f1Hr-rN2Y9RblsWX-r-yMDsQU",
       authDomain: "nosso-historico-amor-354c2.firebaseapp.com",
@@ -277,11 +279,15 @@
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
 
-    function updateProgress(percent, label = "") {
+    // Função utilitária para liberar a renderização da interface e impedir travamento
+    const sleep = (ms = 10) => new Promise(resolve => setTimeout(resolve, ms));
+
+    async function updateProgress(percent, label = "") {
       const p = Math.min(100, Math.max(0, Math.round(percent)));
       progressContainer.style.display = 'block';
       progressBar.style.width = p + '%';
       progressText.innerText = label ? `${label} (${p}%)` : `${p}%`;
+      await sleep(15); // Força o navegador a atualizar a barra visualmente
     }
 
     function hideProgress() {
@@ -290,22 +296,30 @@
       progressText.innerText = '0%';
     }
 
+    function showStatus(msg, isError = false) {
+      statusEl.innerText = msg;
+      if (isError) {
+        statusEl.classList.add('error-text');
+      } else {
+        statusEl.classList.remove('error-text');
+      }
+    }
+
     window.addEventListener('DOMContentLoaded', async () => {
       checkCloudHistory();
     });
 
     async function checkCloudHistory() {
       try {
-        statusEl.innerText = "Verificando se há histórico na nuvem...";
-        
+        showStatus("Verificando histórico na nuvem...");
         const mainDoc = await getDoc(doc(db, "historico_info", "meta"));
 
         if (mainDoc.exists()) {
           const meta = mainDoc.data();
           const totalParts = meta.totalParts || 1;
           
-          statusEl.innerText = "Carregando histórico da nuvem...";
-          updateProgress(5, "Baixando da nuvem");
+          showStatus("Carregando histórico da nuvem...");
+          await updateProgress(5, "Baixando da nuvem");
 
           const querySnapshot = await getDocs(collection(db, "historico_partes"));
           const chunks = [];
@@ -315,45 +329,44 @@
             const data = docSnap.data();
             chunks[data.index] = data.text;
             loadedCount++;
-            const pct = 5 + (loadedCount / totalParts) * 75; // 5% a 80%
-            updateProgress(pct, "Baixando da nuvem");
           });
+
+          for (let i = 0; i < loadedCount; i++) {
+            const pct = 5 + ((i + 1) / totalParts) * 75;
+            await updateProgress(pct, "Baixando da nuvem");
+          }
 
           const compressedBase64 = chunks.join("");
           currentFileName = meta.fileName;
 
-          statusEl.innerText = "Descompactando mensagens...";
-          updateProgress(85, "Descompactando");
+          showStatus("Descompactando mensagens...");
+          await updateProgress(85, "Descompactando");
 
-          // Descompactar JSZip na memória
           const zip = new JSZip();
           const loadedZip = await zip.loadAsync(compressedBase64, { base64: true });
           const txtFileName = Object.keys(loadedZip.files)[0];
           rawFileText = await loadedZip.files[txtFileName].async("string");
 
-          statusEl.innerText = "Processando mensagens...";
-          updateProgress(95, "Organizando mensagens");
+          showStatus("Organizando mensagens...");
+          await updateProgress(95, "Organizando");
 
-          setTimeout(() => {
-            parseWhatsAppText(rawFileText);
-            renderDashboard();
+          parseWhatsAppText(rawFileText);
+          renderDashboard();
 
-            document.getElementById('dropzoneText').innerText = `☁️ Histórico Ativo: ${meta.fileName}`;
-            document.getElementById('lastUpdated').innerText = `Histórico carregado da nuvem (${meta.dataSalvamento || 'Anteriormente'})`;
-            
-            btnDeleteCloud.style.display = "inline-block";
-            btnSaveCloud.style.display = "none";
-            statusEl.innerText = "";
-            hideProgress();
-          }, 100);
-
+          document.getElementById('dropzoneText').innerText = `☁️ Histórico Ativo: ${meta.fileName}`;
+          document.getElementById('lastUpdated').innerText = `Histórico carregado da nuvem (${meta.dataSalvamento || 'Anteriormente'})`;
+          
+          btnDeleteCloud.style.display = "inline-block";
+          btnSaveCloud.style.display = "none";
+          showStatus("");
+          hideProgress();
         } else {
-          statusEl.innerText = "";
+          showStatus("");
           hideProgress();
         }
       } catch (err) {
-        console.error("Erro ao carregar nuvem:", err);
-        statusEl.innerText = "Erro ao carregar histórico da nuvem.";
+        console.error("Erro ao carregar da nuvem:", err);
+        showStatus("Erro ao conectar à nuvem. Verifique o Firebase.", true);
         hideProgress();
       }
     }
@@ -364,58 +377,55 @@
 
       currentFileName = file.name;
       document.getElementById('dropzoneText').innerText = `📄 ${file.name}`;
-      statusEl.innerText = "Lendo arquivo local...";
-      updateProgress(30, "Lendo arquivo");
+      showStatus("Lendo arquivo local...");
+      await updateProgress(20, "Lendo arquivo");
 
-      setTimeout(async () => {
-        try {
-          if (file.name.endsWith('.zip')) {
-            const zip = new JSZip();
-            const zipContent = await zip.loadAsync(file);
-            const txtFile = Object.keys(zipContent.files).find(name => name.endsWith('.txt'));
-            if (!txtFile) {
-              statusEl.innerText = "Arquivo .txt não encontrado no .zip.";
-              hideProgress();
-              return;
-            }
-            rawFileText = await zipContent.files[txtFile].async('string');
-          } else {
-            rawFileText = await file.text();
-          }
-
-          updateProgress(70, "Processando");
-          statusEl.innerText = "Organizando histórico...";
-
-          setTimeout(() => {
-            parseWhatsAppText(rawFileText);
-            renderDashboard();
-            
-            const now = new Date();
-            const dateFormatted = now.toLocaleDateString('pt-BR');
-            const timeFormatted = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            document.getElementById('lastUpdated').innerText = `Arquivo local aberto em ${dateFormatted} às ${timeFormatted}`;
-            
-            btnSaveCloud.style.display = "inline-block";
-            statusEl.innerText = "";
+      try {
+        if (file.name.endsWith('.zip')) {
+          const zip = new JSZip();
+          const zipContent = await zip.loadAsync(file);
+          const txtFile = Object.keys(zipContent.files).find(name => name.endsWith('.txt'));
+          if (!txtFile) {
+            showStatus("Arquivo .txt não encontrado dentro do .zip", true);
             hideProgress();
-          }, 100);
-
-        } catch (err) {
-          statusEl.innerText = "Erro ao processar o arquivo.";
-          hideProgress();
-          console.error(err);
+            return;
+          }
+          rawFileText = await zipContent.files[txtFile].async('string');
+        } else {
+          rawFileText = await file.text();
         }
-      }, 50);
+
+        await updateProgress(60, "Processando mensagens");
+        showStatus("Organizando histórico...");
+
+        parseWhatsAppText(rawFileText);
+        renderDashboard();
+        
+        const now = new Date();
+        const dateFormatted = now.toLocaleDateString('pt-BR');
+        const timeFormatted = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('lastUpdated').innerText = `Arquivo local aberto em ${dateFormatted} às ${timeFormatted}`;
+        
+        btnSaveCloud.style.display = "inline-block";
+        showStatus("");
+        hideProgress();
+
+      } catch (err) {
+        showStatus("Erro ao processar o arquivo selecionado.", true);
+        hideProgress();
+        console.error(err);
+      }
     });
 
     btnSaveCloud.addEventListener('click', async () => {
       if (!rawFileText) return;
-      try {
-        statusEl.innerText = "Comprimindo arquivo de mensagens...";
-        btnSaveCloud.disabled = true;
-        updateProgress(10, "Compactando arquivo");
+      btnSaveCloud.disabled = true;
 
-        // 1. COMPRIMIR O TEXTO COM JSZIP (reduz 80% a 90% do tamanho)
+      try {
+        showStatus("Comprimindo histórico (isso economiza espaço e tempo)...");
+        await updateProgress(10, "Compactando");
+
+        // 1. Compactar texto do arquivo pesado
         const zip = new JSZip();
         zip.file("chat_historico.txt", rawFileText);
         const base64Zip = await zip.generateAsync({
@@ -424,50 +434,55 @@
           compressionOptions: { level: 9 }
         });
 
-        statusEl.innerText = "Limpando histórico antigo na nuvem...";
-        updateProgress(30, "Preparando banco");
+        showStatus("Limpando dados antigos na nuvem...");
+        await updateProgress(25, "Preparando banco");
         await clearCloudData();
 
-        statusEl.innerText = "Enviando pacotes para a nuvem...";
+        showStatus("Salvando partes na nuvem...");
         const now = new Date();
         const dataSalvamento = `${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 
-        // Chunks de ~500KB de string Base64 (totalmente seguro para o Firestore)
-        const CHUNK_SIZE = 500000;
+        // Pacotes seguros de 300KB
+        const CHUNK_SIZE = 300000;
         const totalChunks = Math.ceil(base64Zip.length / CHUNK_SIZE);
         let index = 0;
         
         for (let i = 0; i < base64Zip.length; i += CHUNK_SIZE) {
           const chunk = base64Zip.substring(i, i + CHUNK_SIZE);
+          
+          // Grava no Firestore pedaço por pedaço
           await setDoc(doc(db, "historico_partes", `parte_${index}`), {
             index: index,
             text: chunk
           });
+
           index++;
-          const percent = 30 + (index / totalChunks) * 65; // 30% a 95%
-          updateProgress(percent, "Enviando");
+          const percent = 25 + (index / totalChunks) * 65;
+          await updateProgress(percent, `Enviando parte ${index}/${totalChunks}`);
         }
 
-        // Salvar metadata final
+        // Salva metadados
         await setDoc(doc(db, "historico_info", "meta"), {
           fileName: currentFileName,
           dataSalvamento: dataSalvamento,
           totalParts: index
         });
 
-        updateProgress(100, "Concluído!");
+        await updateProgress(100, "Concluído!");
+        showStatus("Salvo com sucesso!");
+
         setTimeout(() => {
-          alert("Histórico salvo na nuvem com sucesso! ❤️");
+          alert("Histórico gigante salvo na nuvem com sucesso! ❤️");
           btnSaveCloud.style.display = "none";
           btnDeleteCloud.style.display = "inline-block";
-          statusEl.innerText = "";
+          showStatus("");
           hideProgress();
-        }, 300);
+        }, 400);
 
       } catch (err) {
-        console.error("Erro ao salvar:", err);
-        alert("Erro ao salvar no Firestore. Verifique as Regras de Segurança do Firebase.");
-        statusEl.innerText = "Erro ao salvar na nuvem.";
+        console.error("Erro detalhado ao salvar:", err);
+        showStatus("Erro ao salvar! Verifique as Regras de Permissão do Firebase.", true);
+        alert("Erro no Firebase: " + (err.message || "Permissão negada ou erro de rede."));
         hideProgress();
       } finally {
         btnSaveCloud.disabled = false;
@@ -475,11 +490,15 @@
     });
 
     async function clearCloudData() {
-      const querySnapshot = await getDocs(collection(db, "historico_partes"));
-      const batch = writeBatch(db);
-      querySnapshot.forEach((d) => batch.delete(d.ref()));
-      await batch.commit();
-      await deleteDoc(doc(db, "historico_info", "meta")).catch(() => {});
+      try {
+        const querySnapshot = await getDocs(collection(db, "historico_partes"));
+        const batch = writeBatch(db);
+        querySnapshot.forEach((d) => batch.delete(d.ref()));
+        await batch.commit();
+        await deleteDoc(doc(db, "historico_info", "meta")).catch(() => {});
+      } catch (e) {
+        console.warn("Erro ao limpar banco (pode estar vazio):", e);
+      }
     }
 
     btnDeleteCloud.addEventListener('click', async () => {
@@ -490,7 +509,7 @@
       }
 
       try {
-        statusEl.innerText = "Excluindo...";
+        showStatus("Excluindo...");
         await clearCloudData();
         alert("Histórico excluído!");
         location.reload();
