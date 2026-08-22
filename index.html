@@ -79,38 +79,31 @@
     .btn-cloud-danger:hover { background-color: #c9302c; }
     .status-text { text-align: center; font-weight: bold; color: var(--primary); margin-bottom: 8px; font-size: 0.9rem; }
     
-    /* ESTILOS DA BARRA DE PROGRESSO */
+    /* BARRA DE PROGRESSO */
     .progress-container {
       width: 100%;
       background-color: #f0e2e0;
-      border-radius: 10px;
+      border-radius: 12px;
       overflow: hidden;
       margin-bottom: 20px;
       display: none;
       box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
       position: relative;
-      height: 22px;
+      height: 24px;
     }
     .progress-bar {
       height: 100%;
       width: 0%;
       background: linear-gradient(90deg, #a68580, #8c625d);
-      transition: width 0.2s ease-in-out;
-      border-radius: 10px;
+      transition: width 0.3s ease;
+      border-radius: 12px;
     }
     .progress-text {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.75rem;
-      font-weight: bold;
-      color: #ffffff;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+      top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: bold; color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
     }
 
     .counter-section {
@@ -253,7 +246,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // CONFIGURAÇÃO DO FIREBASE
+    // CONFIGURAÇÃO DO SEU FIREBASE
     const firebaseConfig = {
       apiKey: "AIzaSyCoXUPYC0f1Hr-rN2Y9RblsWX-r-yMDsQU",
       authDomain: "nosso-historico-amor-354c2.firebaseapp.com",
@@ -312,7 +305,7 @@
           const totalParts = meta.totalParts || 1;
           
           statusEl.innerText = "Carregando histórico da nuvem...";
-          updateProgress(0, "Baixando");
+          updateProgress(5, "Baixando da nuvem");
 
           const querySnapshot = await getDocs(collection(db, "historico_partes"));
           const chunks = [];
@@ -322,15 +315,24 @@
             const data = docSnap.data();
             chunks[data.index] = data.text;
             loadedCount++;
-            const pct = (loadedCount / totalParts) * 100;
-            updateProgress(pct, "Baixando");
+            const pct = 5 + (loadedCount / totalParts) * 75; // 5% a 80%
+            updateProgress(pct, "Baixando da nuvem");
           });
 
-          rawFileText = chunks.join("");
+          const compressedBase64 = chunks.join("");
           currentFileName = meta.fileName;
 
+          statusEl.innerText = "Descompactando mensagens...";
+          updateProgress(85, "Descompactando");
+
+          // Descompactar JSZip na memória
+          const zip = new JSZip();
+          const loadedZip = await zip.loadAsync(compressedBase64, { base64: true });
+          const txtFileName = Object.keys(loadedZip.files)[0];
+          rawFileText = await loadedZip.files[txtFileName].async("string");
+
           statusEl.innerText = "Processando mensagens...";
-          updateProgress(100, "Processando");
+          updateProgress(95, "Organizando mensagens");
 
           setTimeout(() => {
             parseWhatsAppText(rawFileText);
@@ -351,7 +353,7 @@
         }
       } catch (err) {
         console.error("Erro ao carregar nuvem:", err);
-        statusEl.innerText = "";
+        statusEl.innerText = "Erro ao carregar histórico da nuvem.";
         hideProgress();
       }
     }
@@ -363,7 +365,7 @@
       currentFileName = file.name;
       document.getElementById('dropzoneText').innerText = `📄 ${file.name}`;
       statusEl.innerText = "Lendo arquivo local...";
-      updateProgress(30, "Lendo");
+      updateProgress(30, "Lendo arquivo");
 
       setTimeout(async () => {
         try {
@@ -409,30 +411,44 @@
     btnSaveCloud.addEventListener('click', async () => {
       if (!rawFileText) return;
       try {
-        statusEl.innerText = "Iniciando envio para a nuvem...";
+        statusEl.innerText = "Comprimindo arquivo de mensagens...";
         btnSaveCloud.disabled = true;
-        updateProgress(0, "Enviando");
+        updateProgress(10, "Compactando arquivo");
 
+        // 1. COMPRIMIR O TEXTO COM JSZIP (reduz 80% a 90% do tamanho)
+        const zip = new JSZip();
+        zip.file("chat_historico.txt", rawFileText);
+        const base64Zip = await zip.generateAsync({
+          type: "base64",
+          compression: "DEFLATE",
+          compressionOptions: { level: 9 }
+        });
+
+        statusEl.innerText = "Limpando histórico antigo na nuvem...";
+        updateProgress(30, "Preparando banco");
         await clearCloudData();
 
+        statusEl.innerText = "Enviando pacotes para a nuvem...";
         const now = new Date();
         const dataSalvamento = `${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 
-        const CHUNK_SIZE = 300000; // ~300KB por parte
-        const totalChunks = Math.ceil(rawFileText.length / CHUNK_SIZE);
+        // Chunks de ~500KB de string Base64 (totalmente seguro para o Firestore)
+        const CHUNK_SIZE = 500000;
+        const totalChunks = Math.ceil(base64Zip.length / CHUNK_SIZE);
         let index = 0;
         
-        for (let i = 0; i < rawFileText.length; i += CHUNK_SIZE) {
-          const chunk = rawFileText.substring(i, i + CHUNK_SIZE);
+        for (let i = 0; i < base64Zip.length; i += CHUNK_SIZE) {
+          const chunk = base64Zip.substring(i, i + CHUNK_SIZE);
           await setDoc(doc(db, "historico_partes", `parte_${index}`), {
             index: index,
             text: chunk
           });
           index++;
-          const percent = (index / totalChunks) * 100;
+          const percent = 30 + (index / totalChunks) * 65; // 30% a 95%
           updateProgress(percent, "Enviando");
         }
 
+        // Salvar metadata final
         await setDoc(doc(db, "historico_info", "meta"), {
           fileName: currentFileName,
           dataSalvamento: dataSalvamento,
@@ -450,8 +466,8 @@
 
       } catch (err) {
         console.error("Erro ao salvar:", err);
-        alert("Erro ao salvar no Firestore. Verifique as Regras do Firestore.");
-        statusEl.innerText = "";
+        alert("Erro ao salvar no Firestore. Verifique as Regras de Segurança do Firebase.");
+        statusEl.innerText = "Erro ao salvar na nuvem.";
         hideProgress();
       } finally {
         btnSaveCloud.disabled = false;
