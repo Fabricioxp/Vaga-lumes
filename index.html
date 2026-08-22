@@ -14,20 +14,12 @@
       --text-color: #4a3e3d;
       --text-muted: #8a7573;
       --bg-main: #fff3f2;
-      
-      /* Fabricio (Rosa Seco Suave) */
       --fabricio-bg: #f5e8e6;
       --fabricio-border: #d4a39b;
-      
-      /* Maria (Azul Fortinho Van Gogh) */
       --maria-bg: #1e40af;
       --maria-border: #60a5fa;
-      
-      --accent-pink: #8c625d;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-color: var(--bg-main);
@@ -39,9 +31,7 @@
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
     }
-
     .container { max-width: 800px; width: 100%; }
-
     .card {
       background-color: var(--bg-card);
       border: 1px solid rgba(230, 179, 168, 0.4);
@@ -49,7 +39,6 @@
       padding: 25px;
       box-shadow: 0 10px 25px rgba(140, 98, 93, 0.12);
     }
-
     .file-dropzone {
       border: 2px dashed var(--border-color);
       border-radius: 14px;
@@ -61,15 +50,12 @@
       margin-bottom: 15px;
       transition: all 0.2s;
     }
-
     .file-dropzone:hover { background: #fdf5f4; border-color: var(--primary); }
-
     input[type="file"] {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
       opacity: 0; cursor: pointer;
     }
-
     .cloud-actions {
       display: flex;
       gap: 10px;
@@ -77,7 +63,6 @@
       margin-bottom: 20px;
       flex-wrap: wrap;
     }
-
     .btn-cloud {
       background-color: var(--primary);
       color: white;
@@ -90,15 +75,9 @@
       transition: background 0.2s;
     }
     .btn-cloud:hover { background-color: #734f4b; }
-    
-    .btn-cloud-danger {
-      background-color: #d9534f;
-    }
+    .btn-cloud-danger { background-color: #d9534f; }
     .btn-cloud-danger:hover { background-color: #c9302c; }
-
     .status-text { text-align: center; font-weight: bold; color: var(--primary); margin-bottom: 15px; }
-
-    /* 1. Contador */
     .counter-section {
       text-align: center;
       background: linear-gradient(135deg, rgba(230, 179, 168, 0.25), rgba(140, 98, 93, 0.1));
@@ -108,248 +87,52 @@
       margin-bottom: 20px;
       display: none;
     }
-
     .counter-title { font-size: 0.85rem; color: var(--secondary); text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
     .counter-number { font-size: 2.8rem; font-weight: 800; color: var(--primary); margin: 5px 0; }
     .last-updated { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; font-style: italic; }
-
-    /* Cabeçalho de Seção */
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .section-title { font-size: 0.95rem; font-weight: bold; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
-
     .btn-fullscreen {
-      background: #fff;
-      border: 1px solid var(--border-color);
-      color: var(--primary);
-      padding: 6px 12px;
-      border-radius: 10px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-weight: bold;
-      transition: all 0.2s;
+      background: #fff; border: 1px solid var(--border-color); color: var(--primary);
+      padding: 6px 12px; border-radius: 10px; font-size: 0.75rem; cursor: pointer;
+      display: flex; align-items: center; gap: 4px; font-weight: bold; transition: all 0.2s;
     }
     .btn-fullscreen:hover { background: var(--primary); color: #fff; }
-
-    /* 2. Caixinha "Te Amo" */
     .highlights-box {
-      border: 1px solid rgba(230, 179, 168, 0.5);
-      background: #fffbfb;
-      border-radius: 14px;
-      padding: 15px;
-      margin-bottom: 20px;
-      display: none;
+      border: 1px solid rgba(230, 179, 168, 0.5); background: #fffbfb; border-radius: 14px;
+      padding: 15px; margin-bottom: 20px; display: none;
     }
-
-    .highlights-list {
-      max-height: 220px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      padding-right: 5px;
-    }
-
-    /* Fullscreen Mode */
+    .highlights-list { max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px; }
     .fullscreen-mode {
-      position: fixed !important;
-      top: 0; left: 0; right: 0; bottom: 0;
-      z-index: 9999;
-      background: var(--bg-main) !important;
-      border-radius: 0 !important;
-      padding: 20px !important;
-      margin: 0 !important;
-      display: flex !important;
-      flex-direction: column;
-      gap: 12px;
+      position: fixed !important; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999;
+      background: var(--bg-main) !important; border-radius: 0 !important; padding: 20px !important;
+      margin: 0 !important; display: flex !important; flex-direction: column; gap: 12px;
     }
-
-    .fullscreen-mode .highlights-list,
-    .fullscreen-mode .chat-feed {
-      max-height: none !important;
-      height: 100% !important;
-      flex: 1;
-    }
-
-    /* 3. Área do Chat Completo */
-    .chat-section {
-      display: none;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .chat-controls {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      background: #fffbfb;
-      padding: 14px;
-      border-radius: 14px;
-      border: 1px solid var(--border-color);
-    }
-
+    .fullscreen-mode .highlights-list, .fullscreen-mode .chat-feed { max-height: none !important; height: 100% !important; flex: 1; }
+    .chat-section { display: none; flex-direction: column; gap: 12px; }
+    .chat-controls { display: flex; flex-direction: column; gap: 12px; background: #fffbfb; padding: 14px; border-radius: 14px; border: 1px solid var(--border-color); }
     .search-row { display: flex; gap: 10px; align-items: center; position: relative; }
-    
     .input-wrapper { position: relative; flex: 1; }
-    .input-wrapper input {
-      width: 100%;
-      padding: 10px 12px 10px 36px;
-      border-radius: 12px;
-      border: 1px solid rgba(230, 179, 168, 0.6);
-      background: #ffffff;
-      color: var(--text-color);
-      font-size: 0.9rem;
-      outline: none;
-    }
+    .input-wrapper input { width: 100%; padding: 10px 12px 10px 36px; border-radius: 12px; border: 1px solid rgba(230, 179, 168, 0.6); background: #ffffff; color: var(--text-color); font-size: 0.9rem; outline: none; }
     .input-wrapper input:focus { border-color: var(--primary); }
-
     .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); opacity: 0.6; }
-
     .date-row { display: flex; gap: 10px; align-items: center; font-size: 0.85rem; color: var(--secondary); flex-wrap: wrap; }
-    .date-row input {
-      background: #ffffff;
-      border: 1px solid var(--border-color);
-      color: var(--text-color);
-      padding: 6px 10px;
-      border-radius: 8px;
-    }
-
-    /* Popover Tags */
+    .date-row input { background: #ffffff; border: 1px solid var(--border-color); color: var(--text-color); padding: 6px 10px; border-radius: 8px; }
     .tags-container { position: relative; }
-
-    .tag-menu-btn {
-      background: #ffffff;
-      border: 1px solid var(--border-color);
-      color: var(--primary);
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-size: 0.85rem;
-      font-weight: bold;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      white-space: nowrap;
-    }
+    .tag-menu-btn { background: #ffffff; border: 1px solid var(--border-color); color: var(--primary); padding: 10px 14px; border-radius: 10px; font-size: 0.85rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
     .tag-menu-btn:hover { background: var(--primary); color: #fff; }
-
-    .tags-popover {
-      display: none;
-      position: absolute;
-      top: 110%;
-      right: 0;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 12px;
-      box-shadow: 0 10px 25px rgba(140, 98, 93, 0.18);
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      z-index: 1000;
-      width: 260px;
-    }
-
+    .tags-popover { display: none; position: absolute; top: 110%; right: 0; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 12px; box-shadow: 0 10px 25px rgba(140, 98, 93, 0.18); grid-template-columns: repeat(2, 1fr); gap: 8px; z-index: 1000; width: 260px; }
     .tags-popover.active { display: grid; }
-
-    .tag-item {
-      background: #fffbfb;
-      border: 1px solid var(--border-color);
-      color: var(--text-color);
-      padding: 8px 10px;
-      border-radius: 8px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      text-align: left;
-    }
+    .tag-item { background: #fffbfb; border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 10px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; text-align: left; }
     .tag-item:hover { background: var(--primary); color: #fff; }
-
-    /* 4. Feed de Mensagens */
-    .chat-feed {
-      height: 500px;
-      overflow-y: auto;
-      padding: 12px;
-      background: #fffbfb;
-      border-radius: 14px;
-      border: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .msg-bubble {
-      max-width: 85%;
-      padding: 10px 14px;
-      border-radius: 14px;
-      font-size: 0.9rem;
-      line-height: 1.4;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-      word-break: break-word;
-    }
-
-    .msg-fabricio {
-      align-self: flex-end;
-      background-color: var(--fabricio-bg);
-      border: 1px solid var(--fabricio-border);
-      color: var(--text-color);
-      border-bottom-right-radius: 2px;
-    }
-
-    .msg-maria {
-      align-self: flex-start;
-      background-color: var(--maria-bg);
-      border: 1px solid var(--maria-border);
-      color: #ffffff;
-      border-bottom-left-radius: 2px;
-    }
-
-    .msg-other {
-      align-self: center;
-      background-color: #f1e4e2;
-      border: 1px solid var(--border-color);
-      font-size: 0.8rem;
-      color: var(--secondary);
-    }
-
-    .msg-header {
-      font-size: 0.75rem;
-      font-weight: bold;
-      margin-bottom: 4px;
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      opacity: 0.9;
-    }
-
-    .highlight {
-      background-color: rgba(230, 179, 168, 0.6);
-      color: #000;
-      font-weight: bold;
-      padding: 1px 4px;
-      border-radius: 3px;
-    }
-
-    .load-more-btn {
-      background: var(--primary);
-      color: #ffffff;
-      border: none;
-      padding: 10px 18px;
-      border-radius: 12px;
-      cursor: pointer;
-      margin: 10px 0;
-      font-size: 0.85rem;
-      font-weight: bold;
-      align-self: center;
-      transition: background 0.2s;
-    }
+    .chat-feed { height: 500px; overflow-y: auto; padding: 12px; background: #fffbfb; border-radius: 14px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 12px; }
+    .msg-bubble { max-width: 85%; padding: 10px 14px; border-radius: 14px; font-size: 0.9rem; line-height: 1.4; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; }
+    .msg-fabricio { align-self: flex-end; background-color: var(--fabricio-bg); border: 1px solid var(--fabricio-border); color: var(--text-color); border-bottom-right-radius: 2px; }
+    .msg-maria { align-self: flex-start; background-color: var(--maria-bg); border: 1px solid var(--maria-border); color: #ffffff; border-bottom-left-radius: 2px; }
+    .msg-other { align-self: center; background-color: #f1e4e2; border: 1px solid var(--border-color); font-size: 0.8rem; color: var(--secondary); }
+    .msg-header { font-size: 0.75rem; font-weight: bold; margin-bottom: 4px; display: flex; justify-content: space-between; gap: 8px; opacity: 0.9; }
+    .highlight { background-color: rgba(230, 179, 168, 0.6); color: #000; font-weight: bold; padding: 1px 4px; border-radius: 3px; }
+    .load-more-btn { background: var(--primary); color: #ffffff; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; margin: 10px 0; font-size: 0.85rem; font-weight: bold; align-self: center; transition: background 0.2s; }
     .load-more-btn:hover { background: #734f4b; }
   </style>
 </head>
@@ -364,19 +147,17 @@
 
       <div class="cloud-actions">
         <button id="btnSaveCloud" class="btn-cloud" style="display: none;">☁️ Salvar Histórico na Nuvem</button>
-        <button id="btnDeleteCloud" class="btn-cloud btn-cloud-danger" style="display: none;">🗑️ Excluir Histórico da Nuvem</button>
+        <button id="btnDeleteCloud" class="btn-cloud btn-cloud-danger" style="display: none;">🗑️ Excluir Histórico</button>
       </div>
 
       <div id="status" class="status-text"></div>
 
-      <!-- 1. Contador -->
       <div id="counterSection" class="counter-section">
         <div class="counter-title">Vezes Aproximadas que dissemos "Te Amo" ❤️</div>
         <div id="counterNumber" class="counter-number">0</div>
         <div id="lastUpdated" class="last-updated"></div>
       </div>
 
-      <!-- 2. Caixinha "Te Amo" -->
       <div id="highlightsBox" class="highlights-box">
         <div class="section-header">
           <div class="section-title">💖 Declarações Encontradas no Histórico:</div>
@@ -385,7 +166,6 @@
         <div id="highlightsList" class="highlights-list"></div>
       </div>
 
-      <!-- 3. Seção do Chat Completo -->
       <div id="chatSection" class="chat-section">
         <div class="section-header">
           <div class="section-title">💬 Histórico Completo de Conversas:</div>
@@ -425,21 +205,21 @@
 
         <div id="chatFeed" class="chat-feed"></div>
       </div>
-
     </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+    // COLE AQUI O CONFIG DO SEU NOVO PROJETO
     const firebaseConfig = {
-      apiKey: "AIzaSyAEyJHxEP96ZpSYfAgNO4wdQZIiArseGm4",
-      authDomain: "nosso-canto-5d714.firebaseapp.com",
-      projectId: "nosso-canto-5d714",
-      storageBucket: "nosso-canto-5d714.firebasestorage.app",
-      messagingSenderId: "1042257316625",
-      appId: "1:1042257316625:web:b96e37ad034b598ea61ab0"
+      apiKey: "SUA_API_KEY",
+      authDomain: "seu-projeto.firebaseapp.com",
+      projectId: "seu-projeto",
+      storageBucket: "seu-projeto.firebasestorage.app",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:abcdef"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -466,22 +246,30 @@
 
     async function checkCloudHistory() {
       try {
-        statusEl.innerText = "Verificando se há histórico salvo na nuvem...";
-        const docRef = doc(db, "historico_whatsapp", "chat_principal");
-        const docSnap = await getDoc(docRef);
+        statusEl.innerText = "Verificando se há histórico na nuvem...";
+        
+        const mainDoc = await getDoc(doc(db, "historico_info", "meta"));
 
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          statusEl.innerText = "Carregando histórico da nuvem...";
+        if (mainDoc.exists()) {
+          const meta = mainDoc.data();
+          statusEl.innerText = "Baixando histórico da nuvem...";
+
+          const querySnapshot = await getDocs(collection(db, "historico_partes"));
+          const chunks = [];
           
-          rawFileText = data.text;
-          currentFileName = data.fileName;
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            chunks[data.index] = data.text;
+          });
+
+          rawFileText = chunks.join("");
+          currentFileName = meta.fileName;
 
           parseWhatsAppText(rawFileText);
           renderDashboard();
 
-          document.getElementById('dropzoneText').innerText = `☁️ Histórico Ativo: ${data.fileName}`;
-          document.getElementById('lastUpdated').innerText = `Histórico carregado da nuvem (${data.dataSalvamento || 'Anteriormente'})`;
+          document.getElementById('dropzoneText').innerText = `☁️ Histórico Ativo: ${meta.fileName}`;
+          document.getElementById('lastUpdated').innerText = `Histórico carregado da nuvem (${meta.dataSalvamento || 'Anteriormente'})`;
           
           btnDeleteCloud.style.display = "inline-block";
           btnSaveCloud.style.display = "none";
@@ -491,7 +279,7 @@
         }
       } catch (err) {
         console.error("Erro ao carregar nuvem:", err);
-        statusEl.innerText = "Erro ao carregar dados do Firestore.";
+        statusEl.innerText = "";
       }
     }
 
@@ -535,20 +323,37 @@
       }, 50);
     });
 
-    // Salvar no Firestore
+    // Salva dividindo em partes menores no Firestore
     btnSaveCloud.addEventListener('click', async () => {
       if (!rawFileText) return;
       try {
-        statusEl.innerText = "Enviando arquivo para a nuvem... Aguarde.";
+        statusEl.innerText = "Salvando arquivo na nuvem...";
         btnSaveCloud.disabled = true;
+
+        // Limpa partes antigas primeiro
+        await clearCloudData();
 
         const now = new Date();
         const dataSalvamento = `${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 
-        await setDoc(doc(db, "historico_whatsapp", "chat_principal"), {
+        // Divide o texto em blocos de 300 mil caracteres (~300KB cada)
+        const CHUNK_SIZE = 300000;
+        let index = 0;
+        
+        for (let i = 0; i < rawFileText.length; i += CHUNK_SIZE) {
+          const chunk = rawFileText.substring(i, i + CHUNK_SIZE);
+          await setDoc(doc(db, "historico_partes", `parte_${index}`), {
+            index: index,
+            text: chunk
+          });
+          index++;
+        }
+
+        // Salva metadados
+        await setDoc(doc(db, "historico_info", "meta"), {
           fileName: currentFileName,
-          text: rawFileText,
-          dataSalvamento: dataSalvamento
+          dataSalvamento: dataSalvamento,
+          totalParts: index
         });
 
         alert("Histórico salvo na nuvem com sucesso! ❤️");
@@ -556,39 +361,42 @@
         btnDeleteCloud.style.display = "inline-block";
         statusEl.innerText = "";
       } catch (err) {
-        console.error("Erro ao salvar no Firestore:", err);
-        alert("Erro ao salvar o arquivo no Firestore.");
+        console.error("Erro ao salvar:", err);
+        alert("Erro ao salvar no Firestore. Verifique as Regras do Firestore.");
         statusEl.innerText = "";
       } finally {
         btnSaveCloud.disabled = false;
       }
     });
 
-    // Excluir do Firestore
+    async function clearCloudData() {
+      const querySnapshot = await getDocs(collection(db, "historico_partes"));
+      const batch = writeBatch(db);
+      querySnapshot.forEach((d) => batch.delete(d.ref()));
+      await batch.commit();
+      await deleteDoc(doc(db, "historico_info", "meta")).catch(() => {});
+    }
+
     btnDeleteCloud.addEventListener('click', async () => {
-      const pinDigitado = prompt("⚠️ Para excluir o histórico salvo na nuvem, digite o PIN de segurança:");
+      const pinDigitado = prompt("⚠️ Para excluir o histórico da nuvem, digite o PIN:");
       if (pinDigitado !== "1566") {
         if (pinDigitado !== null) alert("PIN incorreto!");
         return;
       }
 
       try {
-        statusEl.innerText = "Removendo histórico da nuvem...";
-        await deleteDoc(doc(db, "historico_whatsapp", "chat_principal"));
-
-        alert("Histórico da nuvem apagado com sucesso! 👍");
+        statusEl.innerText = "Excluindo...";
+        await clearCloudData();
+        alert("Histórico excluído!");
         location.reload();
       } catch (err) {
-        console.error("Erro ao deletar:", err);
-        alert("Erro ao remover o arquivo da nuvem.");
-        statusEl.innerText = "";
+        alert("Erro ao excluir.");
       }
     });
 
     function parseWhatsAppText(text) {
       parsedMessages = [];
       const lines = text.split('\n');
-      
       const msgRegex = /^\[?(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4}),?\s+(\d{1,2}:\d{2}(?::\d{2})?(?:\s?[AP]M)?)\]?\s*(?:-|\|)?\s*([^:]+):\s*(.*)$/i;
 
       for (let i = 0; i < lines.length; i++) {
@@ -597,10 +405,7 @@
 
         if (match) {
           const content = match[4].trim();
-
-          if (/<mídia\s+oculta>|<arquivo\s+de\s+mídia\s+oculto>|<media\s+omitted>/gi.test(content)) {
-            continue;
-          }
+          if (/<mídia\s+oculta>|<arquivo\s+de\s+mídia\s+oculto>|<media\s+omitted>/gi.test(content)) continue;
 
           const dateParts = match[1].split(/[\/\.-]/);
           let isoDate = "";
@@ -612,11 +417,8 @@
           }
 
           parsedMessages.push({
-            date: isoDate,
-            dateRaw: match[1],
-            time: match[2],
-            author: match[3].trim(),
-            content: content
+            date: isoDate, dateRaw: match[1], time: match[2],
+            author: match[3].trim(), content: content
           });
         } else if (parsedMessages.length > 0) {
           const extraLine = line.trim();
@@ -628,15 +430,11 @@
     }
 
     function renderDashboard() {
-      let loveCount = 0;
-      const loveMessages = [];
+      let loveCount = 0; const loveMessages = [];
 
       parsedMessages.forEach(msg => {
         const matches = msg.content.match(masterLoveRegex);
-        if (matches) {
-          loveCount += matches.length;
-          loveMessages.push(msg);
-        }
+        if (matches) { loveCount += matches.length; loveMessages.push(msg); }
       });
 
       document.getElementById('counterNumber').innerText = loveCount;
@@ -649,13 +447,7 @@
         const highlightedContent = msg.content.replace(masterLoveRegex, match => `<span class="highlight">${match}</span>`);
         const item = document.createElement('div');
         item.className = `msg-bubble ${getAuthorClass(msg.author)}`;
-        item.innerHTML = `
-          <div class="msg-header">
-            <span>${escapeHTML(msg.author)}</span>
-            <span>${msg.dateRaw} ${msg.time}</span>
-          </div>
-          <div>${highlightedContent}</div>
-        `;
+        item.innerHTML = `<div class="msg-header"><span>${escapeHTML(msg.author)}</span><span>${msg.dateRaw} ${msg.time}</span></div><div>${highlightedContent}</div>`;
         highlightsList.appendChild(item);
       });
       
@@ -672,24 +464,15 @@
 
       filteredMessages = parsedMessages.filter(msg => {
         let matchesText = true;
-        if (searchTerm) {
-          if (searchTerm === 'te amo') {
-            matchesText = masterLoveRegex.test(msg.content);
-          } else {
-            matchesText = msg.content.toLowerCase().includes(searchTerm);
-          }
-        }
-
+        if (searchTerm) { matchesText = (searchTerm === 'te amo') ? masterLoveRegex.test(msg.content) : msg.content.toLowerCase().includes(searchTerm); }
         let matchesDate = true;
         if (dateStart && msg.date < dateStart) matchesDate = false;
         if (dateEnd && msg.date > dateEnd) matchesDate = false;
-
         return matchesText && matchesDate;
       });
 
       currentPage = 1;
-      const chatFeed = document.getElementById('chatFeed');
-      chatFeed.innerHTML = "";
+      document.getElementById('chatFeed').innerHTML = "";
       renderPage();
     }
 
@@ -716,58 +499,24 @@
           displayContent = displayContent.replace(masterLoveRegex, match => `<span class="highlight">${match}</span>`);
         }
 
-        item.innerHTML = `
-          <div class="msg-header">
-            <span>${escapeHTML(msg.author)}</span>
-            <span>${msg.dateRaw} ${msg.time}</span>
-          </div>
-          <div>${displayContent}</div>
-        `;
+        item.innerHTML = `<div class="msg-header"><span>${escapeHTML(msg.author)}</span><span>${msg.dateRaw} ${msg.time}</span></div><div>${displayContent}</div>`;
         chatFeed.appendChild(item);
       });
 
       if (end < filteredMessages.length) {
         const btn = document.createElement('button');
-        btn.id = 'loadMoreBtn';
-        btn.className = 'load-more-btn';
+        btn.id = 'loadMoreBtn'; btn.className = 'load-more-btn';
         btn.innerText = `Carregar mais mensagens (${filteredMessages.length - end} restantes)`;
-        btn.onclick = () => {
-          currentPage++;
-          renderPage();
-        };
+        btn.onclick = () => { currentPage++; renderPage(); };
         chatFeed.appendChild(btn);
       }
     }
 
-    window.toggleFullscreen = function(elementId) {
-      const el = document.getElementById(elementId);
-      el.classList.toggle('fullscreen-mode');
-    };
-
-    window.toggleTagsMenu = function(e) {
-      e.stopPropagation();
-      const popover = document.getElementById('tagsPopover');
-      popover.classList.toggle('active');
-    };
-
-    document.addEventListener('click', () => {
-      const popover = document.getElementById('tagsPopover');
-      if (popover) popover.classList.remove('active');
-    });
-
-    window.applyTag = function(tag) {
-      document.getElementById('searchInput').value = tag;
-      const popover = document.getElementById('tagsPopover');
-      if (popover) popover.classList.remove('active');
-      applyFilters();
-    };
-
-    window.clearFilters = function() {
-      document.getElementById('searchInput').value = "";
-      document.getElementById('dateStart').value = "";
-      document.getElementById('dateEnd').value = "";
-      applyFilters();
-    };
+    window.toggleFullscreen = function(elementId) { document.getElementById(elementId).classList.toggle('fullscreen-mode'); };
+    window.toggleTagsMenu = function(e) { e.stopPropagation(); document.getElementById('tagsPopover').classList.toggle('active'); };
+    document.addEventListener('click', () => { const p = document.getElementById('tagsPopover'); if (p) p.classList.remove('active'); });
+    window.applyTag = function(tag) { document.getElementById('searchInput').value = tag; document.getElementById('tagsPopover').classList.remove('active'); applyFilters(); };
+    window.clearFilters = function() { document.getElementById('searchInput').value = ""; document.getElementById('dateStart').value = ""; document.getElementById('dateEnd').value = ""; applyFilters(); };
 
     function getAuthorClass(author) {
       const name = author.toLowerCase();
@@ -776,20 +525,12 @@
       return 'msg-other';
     }
 
-    function escapeHTML(str) {
-      return str.replace(/[&<>'"]/g, 
-        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-      );
-    }
-
-    function escapeRegExp(string) {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
+    function escapeHTML(str) { return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)); }
+    function escapeRegExp(string) { return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
     document.getElementById('searchInput').addEventListener('input', applyFilters);
     document.getElementById('dateStart').addEventListener('change', applyFilters);
     document.getElementById('dateEnd').addEventListener('change', applyFilters);
   </script>
-
 </body>
 </html>
