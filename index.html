@@ -293,7 +293,6 @@
       word-wrap: break-word;
       overflow-wrap: break-word;
       word-break: break-word;
-      white-space: pre-wrap;
     }
 
     .msg-fabricio {
@@ -433,7 +432,6 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAEyJHxEP96ZpSYfAgNO4wdQZIiArseGm4",
@@ -446,13 +444,13 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const storage = getStorage(app);
 
     let parsedMessages = [];
     let filteredMessages = [];
     let currentPage = 1;
     const PAGE_SIZE = 100;
-    let currentFileObj = null;
+    let rawFileText = "";
+    let currentFileName = "";
 
     const patternTE_AMO = /\b(?:e+u+[\s,]*)?t+e+[\s,]+a+m+o+\b/gi;
     const patternAMO_VOCE = /\ba+m+o+[\s,]+(?:v+o+c+e+|v+c+)\b/gi;
@@ -476,10 +474,10 @@
           const data = docSnap.data();
           statusEl.innerText = "Carregando histórico da nuvem...";
           
-          const response = await fetch(data.fileUrl);
-          const text = await response.text();
+          rawFileText = data.text;
+          currentFileName = data.fileName;
 
-          parseWhatsAppText(text);
+          parseWhatsAppText(rawFileText);
           renderDashboard();
 
           document.getElementById('dropzoneText').innerText = `☁️ Histórico Ativo: ${data.fileName}`;
@@ -493,7 +491,7 @@
         }
       } catch (err) {
         console.error("Erro ao carregar nuvem:", err);
-        statusEl.innerText = "Erro ao carregar da nuvem. Verifique o Firebase Storage.";
+        statusEl.innerText = "Erro ao carregar dados do Firestore.";
       }
     }
 
@@ -501,13 +499,12 @@
       const file = e.target.files[0];
       if (!file) return;
 
-      currentFileObj = file;
+      currentFileName = file.name;
       document.getElementById('dropzoneText').innerText = `📄 ${file.name}`;
       statusEl.innerText = "Processando arquivo...";
 
       setTimeout(async () => {
         try {
-          let text = "";
           if (file.name.endsWith('.zip')) {
             const zip = new JSZip();
             const zipContent = await zip.loadAsync(file);
@@ -516,12 +513,12 @@
               statusEl.innerText = "Arquivo .txt não encontrado no .zip.";
               return;
             }
-            text = await zipContent.files[txtFile].async('string');
+            rawFileText = await zipContent.files[txtFile].async('string');
           } else {
-            text = await file.text();
+            rawFileText = await file.text();
           }
 
-          parseWhatsAppText(text);
+          parseWhatsAppText(rawFileText);
           renderDashboard();
           
           const now = new Date();
@@ -538,24 +535,19 @@
       }, 50);
     });
 
-    // Salvar na Nuvem (Storage + Firestore)
+    // Salvar no Firestore
     btnSaveCloud.addEventListener('click', async () => {
-      if (!currentFileObj) return;
+      if (!rawFileText) return;
       try {
         statusEl.innerText = "Enviando arquivo para a nuvem... Aguarde.";
         btnSaveCloud.disabled = true;
-
-        const storageRef = ref(storage, `historicos/${Date.now()}_${currentFileObj.name}`);
-        await uploadBytes(storageRef, currentFileObj);
-        const downloadURL = await getDownloadURL(storageRef);
 
         const now = new Date();
         const dataSalvamento = `${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 
         await setDoc(doc(db, "historico_whatsapp", "chat_principal"), {
-          fileName: currentFileObj.name,
-          fileUrl: downloadURL,
-          storagePath: storageRef.fullPath,
+          fileName: currentFileName,
+          text: rawFileText,
           dataSalvamento: dataSalvamento
         });
 
@@ -564,15 +556,15 @@
         btnDeleteCloud.style.display = "inline-block";
         statusEl.innerText = "";
       } catch (err) {
-        console.error("Erro ao salvar na nuvem:", err);
-        alert("Erro ao salvar o arquivo na nuvem.");
+        console.error("Erro ao salvar no Firestore:", err);
+        alert("Erro ao salvar o arquivo no Firestore.");
         statusEl.innerText = "";
       } finally {
         btnSaveCloud.disabled = false;
       }
     });
 
-    // Excluir da Nuvem
+    // Excluir do Firestore
     btnDeleteCloud.addEventListener('click', async () => {
       const pinDigitado = prompt("⚠️ Para excluir o histórico salvo na nuvem, digite o PIN de segurança:");
       if (pinDigitado !== "1566") {
@@ -582,17 +574,7 @@
 
       try {
         statusEl.innerText = "Removendo histórico da nuvem...";
-        const docRef = doc(db, "historico_whatsapp", "chat_principal");
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data.storagePath) {
-            const storageRef = ref(storage, data.storagePath);
-            await deleteObject(storageRef).catch(() => {});
-          }
-          await deleteDoc(docRef);
-        }
+        await deleteDoc(doc(db, "historico_whatsapp", "chat_principal"));
 
         alert("Histórico da nuvem apagado com sucesso! 👍");
         location.reload();
@@ -605,9 +587,9 @@
 
     function parseWhatsAppText(text) {
       parsedMessages = [];
-      const lines = text.split(/\r?\n/);
-
-      // Expressão regular universal ajustada para iOS e Android
+      const lines = text.split('\n');
+      
+      // Expressão ajustada para capturar flexivelmente datas e horários dos sistemas Android/iOS
       const msgRegex = /^\[?(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4}),?\s+(\d{1,2}:\d{2}(?::\d{2})?(?:\s?[AP]M)?)\]?\s*(?:-|\|)?\s*([^:]+):\s*(.*)$/i;
 
       for (let i = 0; i < lines.length; i++) {
