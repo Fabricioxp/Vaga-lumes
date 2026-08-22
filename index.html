@@ -1,436 +1,813 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nossas Conversas 💬</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nosso Histórico de Amor ❤️</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    :root {
+      --primary: #8c625d;
+      --secondary: #a68580;
+      --border-color: #e6b3a8;
+      --bg-card: #ffffff;
+      --text-color: #4a3e3d;
+      --text-muted: #8a7573;
+      --bg-main: #fff3f2;
+      
+      /* Fabricio (Rosa Seco Suave) */
+      --fabricio-bg: #f5e8e6;
+      --fabricio-border: #d4a39b;
+      
+      /* Maria (Azul Fortinho Van Gogh) */
+      --maria-bg: #1e40af;
+      --maria-border: #60a5fa;
+      
+      --accent-pink: #8c625d;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-color);
+      padding: 16px;
+      padding-top: 30px;
+      display: flex;
+      justify-content: center;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container { max-width: 800px; width: 100%; }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid rgba(230, 179, 168, 0.4);
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 10px 25px rgba(140, 98, 93, 0.12);
+    }
+
+    .file-dropzone {
+      border: 2px dashed var(--border-color);
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      background: #fffbfb;
+      position: relative;
+      margin-bottom: 15px;
+      transition: all 0.2s;
+    }
+
+    .file-dropzone:hover { background: #fdf5f4; border-color: var(--primary); }
+
+    input[type="file"] {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      opacity: 0; cursor: pointer;
+    }
+
+    .cloud-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn-cloud {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-cloud:hover { background-color: #734f4b; }
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    .btn-cloud-danger {
+      background-color: #d9534f;
+    }
+    .btn-cloud-danger:hover { background-color: #c9302c; }
 
-    <style>
-        :root {
-            --primary: #8c625d;
-            --secondary: #a68580;
-            --border-color: #e6b3a8;
-            --bg-card: #ffffff;
-            --text-color: #4a3e3d;
-            --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            --font-title: Georgia, Cambria, 'Times New Roman', Times, serif;
-        }
+    .status-text { text-align: center; font-weight: bold; color: var(--primary); margin-bottom: 15px; }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    /* 1. Contador */
+    .counter-section {
+      text-align: center;
+      background: linear-gradient(135deg, rgba(230, 179, 168, 0.25), rgba(140, 98, 93, 0.1));
+      border: 1px solid var(--border-color);
+      padding: 20px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+      display: none;
+    }
 
-        body {
-            background-color: #fff3f2; 
-            color: var(--text-color);
-            font-family: var(--font-main);
-            padding-bottom: 90px;
-            overflow-x: hidden;
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
-        }
+    .counter-title { font-size: 0.85rem; color: var(--secondary); text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+    .counter-number { font-size: 2.8rem; font-weight: 800; color: var(--primary); margin: 5px 0; }
+    .last-updated { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; font-style: italic; }
 
-        button, input, select, textarea, a {
-            touch-action: manipulation;
-            transform: translateZ(0);
-            will-change: transform;
-        }
+    /* Cabeçalho de Seção */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
 
-        .header-status-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 55px;
-            z-index: 9999;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            padding: 0 20px;
-            box-shadow: 0 2px 15px rgba(140, 98, 93, 0.08);
-            border-bottom: 1px solid rgba(230, 179, 168, 0.25);
-        }
+    .section-title { font-size: 0.95rem; font-weight: bold; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
 
-        .status-usuario-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+    .btn-fullscreen {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      color: var(--primary);
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+    .btn-fullscreen:hover { background: var(--primary); color: #fff; }
 
-        .status-nome-parceiro {
-            font-size: 0.95rem;
-            font-weight: bold;
-            color: var(--primary);
-        }
+    /* 2. Caixinha "Te Amo" */
+    .highlights-box {
+      border: 1px solid rgba(230, 179, 168, 0.5);
+      background: #fffbfb;
+      border-radius: 14px;
+      padding: 15px;
+      margin-bottom: 20px;
+      display: none;
+    }
 
-        .btn-voltar {
-            background: none; 
-            border: 1px solid var(--border-color);
-            padding: 5px 10px; 
-            border-radius: 10px;
-            font-size: 0.8rem; 
-            font-family: var(--font-main);
-            color: var(--secondary); 
-            cursor: pointer;
-            text-decoration: none;
-            transition: background 0.2s;
-        }
-        .btn-voltar:hover { background: rgba(230, 179, 168, 0.15); }
+    .highlights-list {
+      max-height: 220px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-right: 5px;
+    }
 
-        header {
-            text-align: center;
-            padding: 90px 20px 35px 20px;
-            position: relative;
-        }
+    /* Fullscreen Mode */
+    .fullscreen-mode {
+      position: fixed !important;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 9999;
+      background: var(--bg-main) !important;
+      border-radius: 0 !important;
+      padding: 20px !important;
+      margin: 0 !important;
+      display: flex !important;
+      flex-direction: column;
+      gap: 12px;
+    }
 
-        header h1 {
-            font-family: var(--font-title);
-            font-size: 2.3rem;
-            color: var(--primary);
-            margin-bottom: 10px;
-        }
+    .fullscreen-mode .highlights-list,
+    .fullscreen-mode .chat-feed {
+      max-height: none !important;
+      height: 100% !important;
+      flex: 1;
+    }
 
-        header p { font-size: 1rem; color: var(--secondary); }
+    /* 3. Área do Chat Completo */
+    .chat-section {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
 
-        .container-blocos {
-            max-width: 450px;
-            margin: 0 auto;
-            padding: 0 15px;
-            position: relative;
-            z-index: 5;
-        }
+    .chat-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: #fffbfb;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border-color);
+    }
 
-        .bloco-separado {
-            background-color: var(--bg-card);
-            padding: 25px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(140, 98, 93, 0.12);
-            margin-bottom: 25px;
-            position: relative;
-            height: auto;
-        }
+    .search-row { display: flex; gap: 10px; align-items: center; position: relative; }
+    
+    .input-wrapper { position: relative; flex: 1; }
+    .input-wrapper input {
+      width: 100%;
+      padding: 10px 12px 10px 36px;
+      border-radius: 12px;
+      border: 1px solid rgba(230, 179, 168, 0.6);
+      background: #ffffff;
+      color: var(--text-color);
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .input-wrapper input:focus { border-color: var(--primary); }
 
-        .titulo-secao {
-            font-size: 1.1rem;
-            font-weight: bold;
-            text-align: center;
-            color: var(--primary);
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+    .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); opacity: 0.6; }
 
-        #bloco-conversas { background-color: #fff5f0; } 
+    .date-row { display: flex; gap: 10px; align-items: center; font-size: 0.85rem; color: var(--secondary); flex-wrap: wrap; }
+    .date-row input {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
 
-        .painel-upload {
-            background-color: #ffffff;
-            border: 1px dashed var(--border-color);
-            border-radius: 20px;
-            padding: 22px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 20px rgba(140, 98, 93, 0.05);
-            position: relative;
-            z-index: 6;
-            height: auto;
-        }
+    /* Popover Tags */
+    .tags-container { position: relative; }
 
-        .input-custom {
-            width: 100%; padding: 12px 16px; border: 1px solid rgba(230, 179, 168, 0.6);
-            border-radius: 15px; font-family: var(--font-main); font-size: 0.9rem;
-            margin-bottom: 12px; outline: none; background: #fffbfb;
-            color: var(--text-color); transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .input-custom:focus {
-            border-color: var(--primary); background: #ffffff; box-shadow: 0 0 8px rgba(140, 98, 93, 0.1);
-        }
+    .tag-menu-btn {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      color: var(--primary);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .tag-menu-btn:hover { background: var(--primary); color: #fff; }
 
-        textarea.input-custom {
-            resize: vertical;
-            min-height: 90px;
-        }
+    .tags-popover {
+      display: none;
+      position: absolute;
+      top: 110%;
+      right: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: 0 10px 25px rgba(140, 98, 93, 0.18);
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      z-index: 1000;
+      width: 260px;
+    }
 
-        .btn-postar {
-            width: 100%; background-color: var(--primary); color: white; border: none;
-            padding: 14px; border-radius: 15px; font-family: var(--font-main);
-            font-size: 0.95rem; font-weight: bold; cursor: pointer; transition: background 0.2s;
-        }
-        .btn-postar:hover { background-color: #734f4b; }
+    .tags-popover.active { display: grid; }
 
-        .card-conversa {
-            display: flex; flex-direction: column; background: #ffffff; padding: 16px; 
-            border-radius: 16px; box-shadow: 0 4px 12px rgba(140, 98, 93, 0.08); 
-            margin-bottom: 20px; position: relative; border: 1px solid rgba(230, 179, 168, 0.3);
-            transition: transform 0.2s, border-color 0.3s, box-shadow 0.3s; content-visibility: auto; height: auto;
-        }
-        .card-conversa.destaque {
-            border: 2px solid var(--primary); box-shadow: 0 0 20px rgba(140, 98, 93, 0.25);
-            background: #fffbfb; animation: pulsarDestaqueConversa 3s infinite ease-in-out;
-        }
+    .tag-item {
+      background: #fffbfb;
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-align: left;
+    }
+    .tag-item:hover { background: var(--primary); color: #fff; }
 
-        @keyframes pulsarDestaqueConversa {
-            0% { transform: scale(1); box-shadow: 0 0 20px rgba(140, 98, 93, 0.25); }
-            50% { transform: scale(1.02); box-shadow: 0 0 25px rgba(140, 98, 93, 0.4); border-color: var(--border-color); }
-            100% { transform: scale(1); box-shadow: 0 0 20px rgba(140, 98, 93, 0.25); border-color: var(--primary); }
-        }
+    /* 4. Feed de Mensagens */
+    .chat-feed {
+      height: 500px;
+      overflow-y: auto;
+      padding: 12px;
+      background: #fffbfb;
+      border-radius: 14px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
 
-        .conversa-info { flex: 1; min-width: 0; width: 100%; }
-        .conversa-titulo { font-size: 1.15rem; font-weight: bold; color: var(--primary); margin-bottom: 5px; white-space: normal; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; }
-        .conversa-dedicatoria { font-size: 0.8rem; color: var(--secondary); margin-bottom: 8px; word-wrap: break-word; overflow-wrap: break-word; }
-        .conversa-texto { font-size: 0.95rem; color: var(--text-color); margin-top: 10px; white-space: pre-wrap; word-break: break-word; }
+    .msg-bubble {
+      max-width: 85%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
 
-        .menu-acoes-container { position: absolute; top: 15px; right: 15px; z-index: 25; }
-        .btn-tres-pontos { background: none; border: none; font-size: 1.4rem; color: var(--secondary); cursor: pointer; padding: 0 5px; line-height: 1; }
-        .opcoes-tres-pontos { display: none; position: absolute; right: 0; top: 25px; background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-radius: 10px; border: 1px solid var(--border-color); overflow: hidden; z-index: 30; }
-        .opcoes-tres-pontos.visivel { display: block; }
-        .opcoes-tres-pontos button { display: block; width: 100%; padding: 10px 16px; background: none; border: none; font-family: var(--font-main); font-size: 0.85rem; text-align: left; cursor: pointer; color: var(--text-color); white-space: nowrap; }
-        .opcoes-tres-pontos button:hover { background: #fff0ee; }
+    .msg-fabricio {
+      align-self: flex-end;
+      background-color: var(--fabricio-bg);
+      border: 1px solid var(--fabricio-border);
+      color: var(--text-color);
+      border-bottom-right-radius: 2px;
+    }
 
-        .barra-reacoes-polaroid { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 10px; border-top: 1px dashed #f5e4e1; }
-        .btn-coracao-minimalista { background: none; border: none; font-size: 1.3rem; cursor: pointer; transition: transform 0.2s; display: inline-flex; align-items: center; gap: 5px; }
-        .btn-coracao-minimalista:active { transform: scale(1.25) translateZ(0); }
-        .contagem-likes { font-size: 0.85rem; color: var(--secondary); font-weight: bold; }
+    .msg-maria {
+      align-self: flex-start;
+      background-color: var(--maria-bg);
+      border: 1px solid var(--maria-border);
+      color: #ffffff;
+      border-bottom-left-radius: 2px;
+    }
 
-        #canvas-hearts { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none !important; z-index: 1; transform: translateZ(0); }
-    </style>
+    .msg-other {
+      align-self: center;
+      background-color: #f1e4e2;
+      border: 1px solid var(--border-color);
+      font-size: 0.8rem;
+      color: var(--secondary);
+    }
+
+    .msg-header {
+      font-size: 0.75rem;
+      font-weight: bold;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      opacity: 0.9;
+    }
+
+    .highlight {
+      background-color: rgba(230, 179, 168, 0.6);
+      color: #000;
+      font-weight: bold;
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+
+    .load-more-btn {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 12px;
+      cursor: pointer;
+      margin: 10px 0;
+      font-size: 0.85rem;
+      font-weight: bold;
+      align-self: center;
+      transition: background 0.2s;
+    }
+    .load-more-btn:hover { background: #734f4b; }
+  </style>
 </head>
 <body>
 
-    <div class="header-status-bar">
-        <div class="status-usuario-container">
-            <span id="label-parceiro" class="status-nome-parceiro">Carregando...</span>
+  <div class="container">
+    <div class="card">
+      <div class="file-dropzone" id="dropzoneBox">
+        <span id="dropzoneText">📁 Selecione a conversa do WhatsApp (.txt ou .zip)</span>
+        <input type="file" id="fileInput" accept=".txt,.zip">
+      </div>
+
+      <div class="cloud-actions">
+        <button id="btnSaveCloud" class="btn-cloud" style="display: none;">☁️ Salvar Histórico na Nuvem</button>
+        <button id="btnDeleteCloud" class="btn-cloud btn-cloud-danger" style="display: none;">🗑️ Excluir Histórico da Nuvem</button>
+      </div>
+
+      <div id="status" class="status-text"></div>
+
+      <!-- 1. Contador -->
+      <div id="counterSection" class="counter-section">
+        <div class="counter-title">Vezes Aproximadas que dissemos "Te Amo" ❤️</div>
+        <div id="counterNumber" class="counter-number">0</div>
+        <div id="lastUpdated" class="last-updated"></div>
+      </div>
+
+      <!-- 2. Caixinha "Te Amo" -->
+      <div id="highlightsBox" class="highlights-box">
+        <div class="section-header">
+          <div class="section-title">💖 Declarações Encontradas no Histórico:</div>
+          <button class="btn-fullscreen" onclick="toggleFullscreen('highlightsBox')">⛶ Tela Cheia</button>
         </div>
-        <a href="index.html" class="btn-voltar">⬅ Voltar ao Canto</a>
-    </div>
+        <div id="highlightsList" class="highlights-list"></div>
+      </div>
 
-    <canvas id="canvas-hearts"></canvas>
+      <!-- 3. Seção do Chat Completo -->
+      <div id="chatSection" class="chat-section">
+        <div class="section-header">
+          <div class="section-title">💬 Histórico Completo de Conversas:</div>
+          <button class="btn-fullscreen" onclick="toggleFullscreen('chatSection')">⛶ Tela Cheia</button>
+        </div>
 
-    <header>
-        <h1>Nossas Conversas</h1>
-        <p>Onde nossas mensagens e momentos especiais ficam guardados. ✨</p>
-    </header>
-
-    <div class="container-blocos">
-        
-        <section class="painel-upload" id="painel-conversas-posts">
-            <div class="titulo-secao" id="titulo-painel-conversa" style="margin-bottom: 15px;">💬 Guardar uma Conversa</div>
-            <input type="hidden" id="editando-conversa-id" value="">
-            
-            <input type="text" id="conversa-nome" class="input-custom" placeholder="Título / Assunto (Obrigatório)">
-            <textarea id="conversa-texto" class="input-custom" placeholder="Escreva aqui a mensagem ou conversa..."></textarea>
-            
-            <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px; background: #fffafa; padding: 10px; border-radius: 10px; border: 1px solid #ffe6e6;">
-                <input type="checkbox" id="conversa-destaque" style="transform: scale(1.3); margin-left: 5px; accent-color: #ff4d4d;">
-                <label for="conversa-destaque" style="font-size: 0.9rem; font-weight: bold; color: #ff4d4d; cursor: pointer;">🌟 Conversa Inesquecível (Destacar!)</label>
+        <div class="chat-controls">
+          <div class="search-row">
+            <div class="input-wrapper">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="searchInput" placeholder="Pesquisar termo no chat...">
             </div>
-            
-            <button class="btn-postar" id="btn-salvar-conversa">Salvar Conversa 💬</button>
-        </section>
 
-        <section class="bloco-separado" id="bloco-conversas">
-            <div class="titulo-secao">💬 Todas as Conversas</div>
-            <div id="novos-cards-conversas"></div>
-        </section>
+            <div class="tags-container">
+              <button class="tag-menu-btn" onclick="toggleTagsMenu(event)">🏷️ Tags <span style="font-size:0.7rem">▼</span></button>
+              <div id="tagsPopover" class="tags-popover">
+                <button class="tag-item" onclick="applyTag('te amo')">❤️ Te Amo</button>
+                <button class="tag-item" onclick="applyTag('saudade')">🥺 Saudades</button>
+                <button class="tag-item" onclick="applyTag('bom dia')">☀️ Bom dia</button>
+                <button class="tag-item" onclick="applyTag('boa noite')">🌙 Boa noite</button>
+                <button class="tag-item" onclick="applyTag('meu amor')">💖 Meu Amor</button>
+                <button class="tag-item" onclick="applyTag('vida')">🥰 Vida</button>
+                <button class="tag-item" onclick="applyTag('linda')">😍 Linda/o</button>
+                <button class="tag-item" onclick="applyTag('beijo')">😘 Beijos</button>
+                <button class="tag-item" onclick="applyTag('sonho')">✨ Sonho</button>
+                <button class="tag-item" onclick="applyTag('fome')">🍕 Fome</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="date-row">
+            <label>De: <input type="date" id="dateStart"></label>
+            <label>Até: <input type="date" id="dateEnd"></label>
+            <button class="btn-fullscreen" style="margin-left:auto" onclick="clearFilters()">🔄 Limpar</button>
+          </div>
+        </div>
+
+        <div id="chatFeed" class="chat-feed"></div>
+      </div>
 
     </div>
+  </div>
 
-    <script type="module">
-        // TRAVA INSTANTÂNEA: Redireciona na hora sem alerta prévio para evitar brechas visuais
-        let usuarioLogado = sessionStorage.getItem('user_canto');
-        if (!usuarioLogado) {
-            window.location.href = "index.html";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAEyJHxEP96ZpSYfAgNO4wdQZIiArseGm4",
+      authDomain: "nosso-canto-5d714.firebaseapp.com",
+      projectId: "nosso-canto-5d714",
+      storageBucket: "nosso-canto-5d714.firebasestorage.app",
+      messagingSenderId: "1042257316625",
+      appId: "1:1042257316625:web:b96e37ad034b598ea61ab0"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    let parsedMessages = [];
+    let filteredMessages = [];
+    let currentPage = 1;
+    const PAGE_SIZE = 100;
+    let currentFileObj = null;
+
+    const patternTE_AMO = /\b(?:e+u+[\s,]*)?t+e+[\s,]+a+m+o+\b/gi;
+    const patternAMO_VOCE = /\ba+m+o+[\s,]+(?:v+o+c+e+|v+c+)\b/gi;
+    const masterLoveRegex = new RegExp(`${patternTE_AMO.source}|${patternAMO_VOCE.source}`, 'gi');
+
+    const statusEl = document.getElementById('status');
+    const btnSaveCloud = document.getElementById('btnSaveCloud');
+    const btnDeleteCloud = document.getElementById('btnDeleteCloud');
+
+    // Verificar se existe histórico salvo na nuvem ao carregar a página
+    window.addEventListener('DOMContentLoaded', async () => {
+      checkCloudHistory();
+    });
+
+    async function checkCloudHistory() {
+      try {
+        statusEl.innerText = "Verificando se há histórico salvo na nuvem...";
+        const docRef = doc(db, "historico_whatsapp", "chat_principal");
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          statusEl.innerText = "Carregando histórico da nuvem...";
+          
+          const response = await fetch(data.fileUrl);
+          const text = await response.text();
+
+          parseWhatsAppText(text);
+          renderDashboard();
+
+          document.getElementById('dropzoneText').innerText = `☁️ Histórico Ativo: ${data.fileName}`;
+          document.getElementById('lastUpdated').innerText = `Histórico carregado da nuvem (${data.dataSalvamento || 'Anteriormente'})`;
+          
+          btnDeleteCloud.style.display = "inline-block";
+          btnSaveCloud.style.display = "none";
+          statusEl.innerText = "";
+        } else {
+          statusEl.innerText = "";
         }
+      } catch (err) {
+        console.error("Erro ao carregar nuvem:", err);
+        statusEl.innerText = "";
+      }
+    }
 
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, doc, getDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    document.getElementById('fileInput').addEventListener('change', async function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAEyJHxEP96ZpSYfAgNO4wdQZIiArseGm4",
-            authDomain: "nosso-canto-5d714.firebaseapp.com",
-            projectId: "nosso-canto-5d714",
-            storageBucket: "nosso-canto-5d714.firebasestorage.app",
-            messagingSenderId: "1042257316625",
-            appId: "1:1042257316625:web:b96e37ad034b598ea61ab0"
-        };
+      currentFileObj = file;
+      document.getElementById('dropzoneText').innerText = `📄 ${file.name}`;
+      statusEl.innerText = "Processando arquivo...";
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        document.getElementById('label-parceiro').innerText = `Conectado como: ${usuarioLogado} ❤`;
-
-        function verificarPinSeguranca() {
-            const pinDigitado = prompt("⚠️ Para realizar esta ação, digite o PIN de segurança:");
-            if (pinDigitado === "1566") {
-                return true;
-            } else if (pinDigitado !== null) {
-                alert("PIN incorreto! Ação cancelada. 🔐");
+      setTimeout(async () => {
+        try {
+          let text = "";
+          if (file.name.endsWith('.zip')) {
+            const zip = new JSZip();
+            const zipContent = await zip.loadAsync(file);
+            const txtFile = Object.keys(zipContent.files).find(name => name.endsWith('.txt'));
+            if (!txtFile) {
+              statusEl.innerText = "Arquivo .txt não encontrado no .zip.";
+              return;
             }
-            return false;
+            text = await zipContent.files[txtFile].async('string');
+          } else {
+            text = await file.text();
+          }
+
+          parseWhatsAppText(text);
+          renderDashboard();
+          
+          const now = new Date();
+          const dateFormatted = now.toLocaleDateString('pt-BR');
+          const timeFormatted = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+          document.getElementById('lastUpdated').innerText = `Arquivo local aberto em ${dateFormatted} às ${timeFormatted}`;
+          
+          btnSaveCloud.style.display = "inline-block";
+          statusEl.innerText = "";
+        } catch (err) {
+          statusEl.innerText = "Erro ao processar o arquivo.";
+          console.error(err);
         }
+      }, 50);
+    });
 
-        window.alternarMenuTresPontos = function(id) {
-            const menu = document.getElementById(`opcoes-${id}`);
-            if (menu) menu.classList.toggle('visivel');
-        };
+    // Salvar na Nuvem
+    btnSaveCloud.addEventListener('click', async () => {
+      if (!currentFileObj) return;
+      try {
+        statusEl.innerText = "Enviando arquivo para a nuvem... Aguarde.";
+        btnSaveCloud.disabled = true;
 
-        document.addEventListener('click', function(e) {
-            if (!e.target.classList.contains('btn-tres-pontos')) {
-                document.querySelectorAll('.opcoes-tres-pontos').forEach(m => m.classList.remove('visivel'));
-            }
+        const storageRef = ref(storage, `historico/${Date.now()}_${currentFileObj.name}`);
+        await uploadBytes(storageRef, currentFileObj);
+        const downloadURL = await getDownloadURL(storageRef);
+
+        const now = new Date();
+        const dataSalvamento = `${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+
+        await setDoc(doc(db, "historico_whatsapp", "chat_principal"), {
+          fileName: currentFileObj.name,
+          fileUrl: downloadURL,
+          storagePath: storageRef.fullPath,
+          dataSalvamento: dataSalvamento
         });
 
-        function resetarFormularioConversa() {
-            document.getElementById('editando-conversa-id').value = '';
-            document.getElementById('conversa-nome').value = '';
-            document.getElementById('conversa-texto').value = '';
-            document.getElementById('conversa-destaque').checked = false;
-            document.getElementById('titulo-painel-conversa').innerText = '💬 Guardar uma Conversa';
-            document.getElementById('btn-salvar-conversa').innerText = 'Salvar Conversa 💬';
+        alert("Histórico salvo na nuvem com sucesso! ❤️");
+        btnSaveCloud.style.display = "none";
+        btnDeleteCloud.style.display = "inline-block";
+        statusEl.innerText = "";
+      } catch (err) {
+        console.error("Erro ao salvar na nuvem:", err);
+        alert("Erro ao salvar o arquivo na nuvem.");
+        statusEl.innerText = "";
+      } finally {
+        btnSaveCloud.disabled = false;
+      }
+    });
+
+    // Excluir da Nuvem
+    btnDeleteCloud.addEventListener('click', async () => {
+      const pinDigitado = prompt("⚠️ Para excluir o histórico salvo na nuvem, digite o PIN de segurança:");
+      if (pinDigitado !== "1566") {
+        if (pinDigitado !== null) alert("PIN incorreto!");
+        return;
+      }
+
+      try {
+        statusEl.innerText = "Removendo histórico da nuvem...";
+        const docRef = doc(db, "historico_whatsapp", "chat_principal");
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.storagePath) {
+            const storageRef = ref(storage, data.storagePath);
+            await deleteObject(storageRef).catch(() => {});
+          }
+          await deleteDoc(docRef);
         }
 
-        window.salvarConversaFirebase = async function() {
-            const idEditando = document.getElementById('editando-conversa-id').value;
-            const titulo = document.getElementById('conversa-nome').value.trim();
-            const texto = document.getElementById('conversa-texto').value.trim();
-            const destaque = document.getElementById('conversa-destaque').checked;
+        alert("Histórico da nuvem apagado com sucesso! 👍");
+        location.reload();
+      } catch (err) {
+        console.error("Erro ao deletar:", err);
+        alert("Erro ao remover o arquivo da nuvem.");
+        statusEl.innerText = "";
+      }
+    });
 
-            if (!titulo || !texto) { alert('Por favor, digite o título e o texto da conversa! 💬'); return; }
+    function parseWhatsAppText(text) {
+      parsedMessages = [];
+      const lines = text.split('\n');
+      const msgRegex = /^\[?(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s(\d{1,2}:\d{2}(?::\d{2})?)\]?\s-?\s?([^:]+):\s(.*)$/;
 
-            try {
-                if (idEditando) {
-                    await updateDoc(doc(db, "posts", idEditando), { titulo, texto, destaque });
-                    alert('Conversa atualizada! 💬');
-                } else {
-                    await addDoc(collection(db, "posts"), {
-                        destino: 'conversas', titulo, texto, destaque, autor: usuarioLogado, criadoEm: Date.now(), curtidas: []
-                    });
-                    alert('Conversa salva com sucesso! ❤️');
-                }
-                resetarFormularioConversa();
-            } catch (error) { console.error(error); }
-        };
-        document.getElementById('btn-salvar-conversa').addEventListener('click', window.salvarConversaFirebase);
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const match = line.match(msgRegex);
 
-        window.prepararEdicaoConversa = function(id, titulo, texto, destaque) {
-            document.getElementById('editando-conversa-id').value = id;
-            document.getElementById('conversa-nome').value = titulo;
-            document.getElementById('conversa-texto').value = texto;
-            document.getElementById('conversa-destaque').checked = (destaque === 'true' || destaque === true);
-            document.getElementById('titulo-painel-conversa').innerText = '✏️ Editar Conversa';
-            document.getElementById('btn-salvar-conversa').innerText = 'Atualizar Conversa 💬';
-            document.getElementById('painel-conversas-posts').scrollIntoView({ behavior: 'smooth' });
-        };
+        if (match) {
+          const content = match[4].trim();
 
-        window.removerPostagemFirebase = async function(id) {
-            if (verificarPinSeguranca()) {
-                await deleteDoc(doc(db, "posts", id));
-                resetarFormularioConversa();
-                alert("Lembrança apagada com sucesso! 👍");
-            }
-        };
+          // REMOÇÃO DE MÍDIA OCULTA / ARQUIVO OCULTO
+          if (/<mídia\s+oculta>|<arquivo\s+de\s+mídia\s+oculto>|<media\s+omitted>/gi.test(content)) {
+            continue;
+          }
 
-        window.alternarCurtidaItem = async function(id) {
-            try {
-                const docRef = doc(db, "posts", id);
-                const docSnap = await getDoc(docRef);
-                
-                if (docSnap.exists()) {
-                    let listaLikes = docSnap.data().curtidas || [];
-                    if (!Array.isArray(listaLikes)) listaLikes = [];
-                    
-                    const index = listaLikes.indexOf(usuarioLogado);
+          const dateParts = match[1].split('/');
+          let isoDate = "";
+          if (dateParts.length === 3) {
+            let year = dateParts[2].length === 2 ? '20' + dateParts[2] : dateParts[2];
+            let month = dateParts[1].padStart(2, '0');
+            let day = dateParts[0].padStart(2, '0');
+            isoDate = `${year}-${month}-${day}`;
+          }
 
-                    if (index > -1) { listaLikes.splice(index, 1); } 
-                    else { listaLikes.push(usuarioLogado); }
+          parsedMessages.push({
+            date: isoDate,
+            dateRaw: match[1],
+            time: match[2],
+            author: match[3].trim(),
+            content: content
+          });
+        } else if (parsedMessages.length > 0) {
+          const extraLine = line.trim();
+          if (!/<mídia\s+oculta>|<arquivo\s+de\s+mídia\s+oculto>|<media\s+omitted>/gi.test(extraLine)) {
+            parsedMessages[parsedMessages.length - 1].content += "\n" + extraLine;
+          }
+        }
+      }
+    }
 
-                    await updateDoc(docRef, { curtidas: listaLikes });
-                }
-            } catch (error) { console.error(error); }
-        };
+    function renderDashboard() {
+      let loveCount = 0;
+      const loveMessages = [];
 
-        const containerConversas = document.getElementById('novos-cards-conversas');
-        const qCards = query(collection(db, "posts"), orderBy("criadoEm", "asc"));
+      parsedMessages.forEach(msg => {
+        const matches = msg.content.match(masterLoveRegex);
+        if (matches) {
+          loveCount += matches.length;
+          loveMessages.push(msg);
+        }
+      });
+
+      document.getElementById('counterNumber').innerText = loveCount;
+      document.getElementById('counterSection').style.display = 'block';
+
+      const highlightsList = document.getElementById('highlightsList');
+      highlightsList.innerHTML = "";
+      
+      loveMessages.forEach(msg => {
+        const highlightedContent = msg.content.replace(masterLoveRegex, match => `<span class="highlight">${match}</span>`);
+        const item = document.createElement('div');
+        item.className = `msg-bubble ${getAuthorClass(msg.author)}`;
+        item.innerHTML = `
+          <div class="msg-header">
+            <span>${escapeHTML(msg.author)}</span>
+            <span>${msg.dateRaw} ${msg.time}</span>
+          </div>
+          <div>${highlightedContent}</div>
+        `;
+        highlightsList.appendChild(item);
+      });
+      
+      document.getElementById('highlightsBox').style.display = 'block';
+      document.getElementById('chatSection').style.display = 'flex';
+      
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const dateStart = document.getElementById('dateStart').value;
+      const dateEnd = document.getElementById('dateEnd').value;
+
+      filteredMessages = parsedMessages.filter(msg => {
+        let matchesText = true;
+        if (searchTerm) {
+          if (searchTerm === 'te amo') {
+            matchesText = masterLoveRegex.test(msg.content);
+          } else {
+            matchesText = msg.content.toLowerCase().includes(searchTerm);
+          }
+        }
+
+        let matchesDate = true;
+        if (dateStart && msg.date < dateStart) matchesDate = false;
+        if (dateEnd && msg.date > dateEnd) matchesDate = false;
+
+        return matchesText && matchesDate;
+      });
+
+      currentPage = 1;
+      const chatFeed = document.getElementById('chatFeed');
+      chatFeed.innerHTML = "";
+      renderPage();
+    }
+
+    function renderPage() {
+      const chatFeed = document.getElementById('chatFeed');
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      
+      const start = (currentPage - 1) * PAGE_SIZE;
+      const end = currentPage * PAGE_SIZE;
+      const pageItems = filteredMessages.slice(start, end);
+
+      const oldButton = document.getElementById('loadMoreBtn');
+      if (oldButton) oldButton.remove();
+
+      pageItems.forEach(msg => {
+        const item = document.createElement('div');
+        item.className = `msg-bubble ${getAuthorClass(msg.author)}`;
         
-        onSnapshot(qCards, (snapshot) => {
-            containerConversas.innerHTML = '';
-            let itensConversas = [];
-
-            snapshot.forEach((docSnap) => {
-                const post = { id: docSnap.id, ...docSnap.data() };
-                if (post.destino === 'conversas') { itensConversas.push(post); }
-            });
-
-            itensConversas.forEach((post) => {
-                const curtidasArray = post.curtidas || [];
-                const jaCurtido = curtidasArray.includes(usuarioLogado);
-                const blocoConversa = document.createElement('div');
-                let classesCartao = 'card-conversa';
-                if (post.destaque) { classesCartao += ' destaque'; }
-
-                const menuTresPontosConversa = (post.autor === usuarioLogado) ? `
-                    <div class="menu-acoes-container">
-                        <button class="btn-tres-pontos" onclick="alternarMenuTresPontos('${post.id}')">⋮</button>
-                        <div class="opcoes-tres-pontos" id="opcoes-${post.id}">
-                            <button onclick="prepararEdicaoConversa('${post.id}', \`${post.titulo}\`, \`${post.texto}\`, ${post.destaque})">Editar ✏️</button>
-                            <button style="color:#d9534f;" onclick="removerPostagemFirebase('${post.id}')">Excluir 🗑️</button>
-                        </div>
-                    </div>
-                ` : '';
-
-                blocoConversa.className = classesCartao;
-                blocoConversa.innerHTML = `
-                    ${menuTresPontosConversa}
-                    <div class="conversa-info">
-                        <div class="conversa-titulo" title="${post.titulo}">${post.titulo}</div>
-                        <div class="conversa-dedicatoria">Enviado por: <strong>${post.autor}</strong></div>
-                        <div class="conversa-texto">${post.texto}</div>
-                    </div>
-                    <div class="barra-reacoes-polaroid">
-                        <button class="btn-coracao-minimalista" onclick="alternarCurtidaItem('${post.id}')">${jaCurtido ? '❤️' : '🤍'}</button>
-                        <span class="contagem-likes">${curtidasArray.length} amaram</span>
-                    </div>
-                `;
-                if (post.destaque) { containerConversas.prepend(blocoConversa); } else { containerConversas.appendChild(blocoConversa); }
-            });
-        });
-    </script>
-
-    <script>
-        const canvas = document.getElementById('canvas-hearts'); const ctx = canvas.getContext('2d');
-        let listaCoracoes = [];
-
-        function redimensionarCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.addEventListener('resize', redimensionarCanvas); redimensionarCanvas();
-
-        class Coracao {
-            constructor() {
-                this.x = Math.random() * canvas.width; this.y = canvas.height + Math.random() * 20;
-                this.size = Math.random() * 8 + 5; this.speed = Math.random() * 1.5 + 1.2; 
-                this.opacity = 1; this.colorValue = 140 + Math.floor(Math.random() * 40);
-            }
-            atualizar() { this.y -= this.speed; this.x += Math.sin(this.y / 30) * 0.2; this.opacity -= 0.005; }
-            desenhar() {
-                ctx.save(); ctx.globalAlpha = this.opacity; ctx.fillStyle = `rgba(${this.colorValue}, 98, 93, ${this.opacity})`;
-                ctx.beginPath(); ctx.moveTo(this.x, this.y);
-                ctx.bezierCurveTo(this.x - this.size / 2, this.y - this.size / 2, this.x - this.size, this.y + this.size / 3, this.x, this.y + this.size);
-                ctx.bezierCurveTo(this.x + this.size, this.y + this.size / 3, this.x + this.size / 2, this.y - this.size / 2, this.x, this.y);
-                ctx.fill(); ctx.restore();
-            }
+        let displayContent = escapeHTML(msg.content);
+        if (searchTerm && searchTerm !== 'te amo') {
+          const searchRegex = new RegExp(`(${escapeRegExp(searchTerm)})`, 'gi');
+          displayContent = displayContent.replace(searchRegex, `<span class="highlight">$1</span>`);
+        } else if (searchTerm === 'te amo') {
+          displayContent = displayContent.replace(masterLoveRegex, match => `<span class="highlight">${match}</span>`);
         }
 
-        function animarLoop() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            listaCoracoes = listaCoracoes.filter(c => { c.atualizar(); c.desenhar(); return c.opacity > 0 && c.y >= -20; });
-            requestAnimationFrame(animarLoop);
-        }
-        document.addEventListener('DOMContentLoaded', () => { animarLoop(); });
-    </script>
+        item.innerHTML = `
+          <div class="msg-header">
+            <span>${escapeHTML(msg.author)}</span>
+            <span>${msg.dateRaw} ${msg.time}</span>
+          </div>
+          <div>${displayContent}</div>
+        `;
+        chatFeed.appendChild(item);
+      });
+
+      if (end < filteredMessages.length) {
+        const btn = document.createElement('button');
+        btn.id = 'loadMoreBtn';
+        btn.className = 'load-more-btn';
+        btn.innerText = `Carregar mais mensagens (${filteredMessages.length - end} restantes)`;
+        btn.onclick = () => {
+          currentPage++;
+          renderPage();
+        };
+        chatFeed.appendChild(btn);
+      }
+    }
+
+    window.toggleFullscreen = function(elementId) {
+      const el = document.getElementById(elementId);
+      el.classList.toggle('fullscreen-mode');
+    };
+
+    window.toggleTagsMenu = function(e) {
+      e.stopPropagation();
+      const popover = document.getElementById('tagsPopover');
+      popover.classList.toggle('active');
+    };
+
+    document.addEventListener('click', () => {
+      const popover = document.getElementById('tagsPopover');
+      if (popover) popover.classList.remove('active');
+    });
+
+    window.applyTag = function(tag) {
+      document.getElementById('searchInput').value = tag;
+      const popover = document.getElementById('tagsPopover');
+      if (popover) popover.classList.remove('active');
+      applyFilters();
+    };
+
+    window.clearFilters = function() {
+      document.getElementById('searchInput').value = "";
+      document.getElementById('dateStart').value = "";
+      document.getElementById('dateEnd').value = "";
+      applyFilters();
+    };
+
+    function getAuthorClass(author) {
+      const name = author.toLowerCase();
+      if (name.includes('fabricio') || name.includes('fabrício')) return 'msg-fabricio';
+      if (name.includes('maria')) return 'msg-maria';
+      return 'msg-other';
+    }
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"]/g, 
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+      );
+    }
+
+    function escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    document.getElementById('dateStart').addEventListener('change', applyFilters);
+    document.getElementById('dateEnd').addEventListener('change', applyFilters);
+  </script>
+
 </body>
 </html>
