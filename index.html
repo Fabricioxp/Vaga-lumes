@@ -10,7 +10,6 @@
       --bg-color: #0f172a;
       --card-bg: #1e293b;
       --primary: #ec4899;
-      --primary-hover: #db2777;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --border: #334155;
@@ -26,10 +25,7 @@
       justify-content: center;
     }
 
-    .container {
-      max-width: 650px;
-      width: 100%;
-    }
+    .container { max-width: 650px; width: 100%; }
 
     .card {
       background-color: var(--card-bg);
@@ -50,7 +46,6 @@
       cursor: pointer;
       background: rgba(236, 72, 153, 0.05);
       position: relative;
-      transition: all 0.2s ease;
     }
 
     .file-dropzone:hover { background: rgba(236, 72, 153, 0.1); }
@@ -63,14 +58,10 @@
 
     .status-text { margin-top: 15px; font-weight: 500; color: var(--primary); }
 
-    /* Seção de Resultados na Parte Inferior */
-    .results-container {
-      margin-top: 30px;
-      display: none;
-    }
+    .results-container { margin-top: 30px; display: none; }
 
     .stat-card {
-      background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(30, 41, 59, 0.5));
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(30, 41, 59, 0.6));
       border: 1px solid var(--primary);
       padding: 20px;
       border-radius: 14px;
@@ -78,7 +69,7 @@
       margin-bottom: 25px;
     }
 
-    .stat-number { font-size: 2.8rem; font-weight: 800; color: var(--primary); }
+    .stat-number { font-size: 3rem; font-weight: 800; color: var(--primary); }
     .stat-label { font-size: 0.95rem; color: var(--text-main); margin-top: 4px; }
 
     .messages-list {
@@ -100,7 +91,7 @@
     }
 
     .highlight {
-      background-color: rgba(236, 72, 153, 0.35);
+      background-color: rgba(236, 72, 153, 0.4);
       color: #f472b6;
       font-weight: bold;
       padding: 2px 6px;
@@ -113,20 +104,19 @@
   <div class="container">
     <div class="card">
       <h1>Contador de Amor ❤️</h1>
-      <p class="subtitle">Envie o arquivo exportado do WhatsApp (.txt ou .zip) para ver todas as declarações e variações de intensidade!</p>
+      <p class="subtitle">Selecione o arquivo da conversa do WhatsApp (.txt ou .zip)</p>
 
       <div class="file-dropzone">
-        <span id="dropzoneText">📁 Selecione a conversa exportada</span>
+        <span id="dropzoneText">📁 Clique ou arraste a conversa aqui</span>
         <input type="file" id="fileInput" accept=".txt,.zip">
       </div>
 
       <div id="status" class="status-text"></div>
 
-      <!-- Área de resultados abaixo -->
       <div id="resultsContainer" class="results-container">
         <div class="stat-card">
           <div id="totalCount" class="stat-number">0</div>
-          <div class="stat-label">Declarações "Te Amo" encontradas</div>
+          <div class="stat-label">Declarações encontradas</div>
         </div>
 
         <div id="messagesList" class="messages-list"></div>
@@ -147,7 +137,7 @@
       const totalCount = document.getElementById('totalCount');
 
       dropzoneText.innerText = `📄 ${file.name}`;
-      status.innerText = "Analisando histórico de conversas...";
+      status.innerText = "Processando mensagens...";
       resultsContainer.style.display = "none";
       messagesList.innerHTML = "";
 
@@ -160,7 +150,7 @@
           const txtFile = Object.keys(zipContent.files).find(name => name.endsWith('.txt'));
           
           if (!txtFile) {
-            status.innerText = "Nenhum arquivo .txt encontrado no .zip.";
+            status.innerText = "Nenhum arquivo de conversa encontrado no .zip.";
             return;
           }
           text = await zipContent.files[txtFile].async('string');
@@ -168,21 +158,25 @@
           text = await file.text();
         }
 
-        // Captura todas as variações com intensidade e acentuações:
-        // - "eu" opcional com vogais repetidas (ex: eeeuuuu, eúuu)
-        // - "te" com letras repetidas (ex: teee, tteee)
-        // - "amo" com letras repetidas (ex: amooo, aammmooo)
-        const regexPattern = /(?:[eéèêé]+[uú]+[\s,]*)?[tT]+[eéèêé]+[\s,]+[aáàâãá]+[mM]+[oóòôõó]+/gi;
+        // Padrões de captura flexíveis para intensidades:
+        // 1. "eu" + "te" + "amo" (ex: euuu teee amooo, eú te amo)
+        // 2. "te" + "amo" (ex: teee amooo)
+        // 3. "amo" + "você/voce/vc" (ex: amooo vocêe, amooo vccc, amoo vc)
+        const patternEU_TE_AMO = /(?:[eéèêé]+[uú]+[\s,]*)?[tT]+[eéèêé]+[\s,]+[aáàâãá]+[mM]+[oóòôõó]+/gi;
+        const patternAMO_VOCE = /[aáàâãá]+[mM]+[oóòôõó]+[\s,]+(?:[vV]+[oóòôõó]+[cC]+[eéèêé]*|[vV]+[cC]+)/gi;
+
+        // Combina ambas as buscas em uma só regra
+        const masterRegex = new RegExp(`${patternEU_TE_AMO.source}|${patternAMO_VOCE.source}`, 'gi');
 
         const lines = text.split('\n');
         let matchesCount = 0;
         let htmlList = "";
 
         lines.forEach(line => {
-          const matchesInLine = line.match(regexPattern);
+          const matchesInLine = line.match(masterRegex);
           if (matchesInLine) {
             matchesCount += matchesInLine.length;
-            const highlightedText = line.replace(regexPattern, match => `<span class="highlight">${match}</span>`);
+            const highlightedText = line.replace(masterRegex, match => `<span class="highlight">${match}</span>`);
             htmlList += `<div class="message-item">${highlightedText}</div>`;
           }
         });
@@ -191,14 +185,14 @@
         totalCount.innerText = matchesCount;
 
         if (matchesCount > 0) {
-          messagesList.innerHTML = `<h3 style="margin-bottom:15px; font-size:1rem; color:var(--text-muted)">Histórico de Mensagens:</h3>` + htmlList;
+          messagesList.innerHTML = `<h3 style="margin-bottom:15px; font-size:1rem; color:var(--text-muted)">Mensagens encontradas:</h3>` + htmlList;
           resultsContainer.style.display = "block";
         } else {
-          status.innerText = "Nenhuma variação de \"te amo\" foi encontrada na conversa.";
+          status.innerText = "Nenhuma declaração foi encontrada no arquivo.";
         }
 
       } catch (err) {
-        status.innerText = "Erro ao ler o arquivo. Certifique-se de que é um arquivo válido do WhatsApp.";
+        status.innerText = "Erro ao processar o arquivo.";
         console.error(err);
       }
     });
