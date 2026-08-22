@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contador de Amor do WhatsApp ❤️</title>
+  <title>Buscador de Conversas do WhatsApp 🔍❤️</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
     :root {
@@ -46,11 +46,11 @@
     .file-dropzone {
       border: 2px dashed var(--primary);
       border-radius: 12px;
-      padding: 30px 20px;
+      padding: 25px 20px;
       cursor: pointer;
       background: rgba(236, 72, 153, 0.05);
-      transition: all 0.2s ease;
       position: relative;
+      margin-bottom: 20px;
     }
 
     .file-dropzone:hover { background: rgba(236, 72, 153, 0.1); }
@@ -59,6 +59,59 @@
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
       opacity: 0; cursor: pointer;
+    }
+
+    /* Container de Busca com Lupa */
+    .search-box {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      display: none;
+    }
+
+    .input-wrapper {
+      position: relative;
+      flex: 1;
+    }
+
+    .input-wrapper input {
+      width: 100%;
+      padding: 12px 16px 12px 42px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background-color: #0f172a;
+      color: #fff;
+      font-size: 1rem;
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    .input-wrapper input:focus {
+      border-color: var(--primary);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.1rem;
+      color: var(--text-muted);
+    }
+
+    .search-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0 20px;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .search-btn:hover {
+      background-color: var(--primary-hover);
     }
 
     .stats-grid {
@@ -81,7 +134,7 @@
     .stat-label { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
 
     .messages-list {
-      margin-top: 30px;
+      margin-top: 25px;
       text-align: left;
       max-height: 400px;
       overflow-y: auto;
@@ -113,12 +166,21 @@
 
   <div class="container">
     <div class="card">
-      <h1>Contador de Amor ❤️</h1>
-      <p class="subtitle">Descubra quantas vezes vocês disseram "te amo" no WhatsApp, inclusive com variações de intensidade!</p>
+      <h1>Lupa do Amor 🔍❤️</h1>
+      <p class="subtitle">Faça upload da conversa e busque por declarações de amor, inclusive com repetições de letras!</p>
 
       <div class="file-dropzone">
-        <span id="dropzoneText">📁 Clique ou arraste a conversa exportada (.txt ou .zip)</span>
+        <span id="dropzoneText">📁 Selecione a conversa exportada (.txt ou .zip)</span>
         <input type="file" id="fileInput" accept=".txt,.zip">
+      </div>
+
+      <!-- Barra de Pesquisa -->
+      <div id="searchBox" class="search-box">
+        <div class="input-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" value="eu te amo" placeholder="Digite o termo de busca...">
+        </div>
+        <button id="searchBtn" class="search-btn">Buscar</button>
       </div>
 
       <div id="status" class="status-text"></div>
@@ -126,7 +188,7 @@
       <div id="statsGrid" class="stats-grid">
         <div class="stat-card">
           <div id="totalCount" class="stat-number">0</div>
-          <div class="stat-label">Total de Declarações</div>
+          <div class="stat-label" id="statLabel">Resultados encontrados</div>
         </div>
       </div>
 
@@ -135,74 +197,105 @@
   </div>
 
   <script>
+    let rawTextContent = "";
+
     document.getElementById('fileInput').addEventListener('change', async function(e) {
       const file = e.target.files[0];
       if (!file) return;
 
       const status = document.getElementById('status');
       const dropzoneText = document.getElementById('dropzoneText');
-      const statsGrid = document.getElementById('statsGrid');
-      const messagesList = document.getElementById('messagesList');
-      const totalCount = document.getElementById('totalCount');
+      const searchBox = document.getElementById('searchBox');
 
       dropzoneText.innerText = `📄 ${file.name}`;
-      status.innerText = "Analisando histórico...";
-      messagesList.innerHTML = "";
-      statsGrid.style.display = "none";
-      messagesList.style.display = "none";
+      status.innerText = "Carregando histórico...";
 
       try {
-        let text = "";
-
         if (file.name.endsWith('.zip')) {
           const zip = new JSZip();
           const zipContent = await zip.loadAsync(file);
           const txtFile = Object.keys(zipContent.files).find(name => name.endsWith('.txt'));
           
           if (!txtFile) {
-            status.innerText = "Nenhum arquivo .txt encontrado dentro do arquivo .zip.";
+            status.innerText = "Nenhum arquivo .txt encontrado no .zip.";
             return;
           }
-          text = await zipContent.files[txtFile].async('string');
+          rawTextContent = await zipContent.files[txtFile].async('string');
         } else {
-          text = await file.text();
+          rawTextContent = await file.text();
         }
 
-        // Regex para capturar variações do "te amo" com intensidade estendida
-        const regexPattern = /\b(e+u+[\s,]*)?t+e+[\s,]+a+m+o+\b/gi;
-
-        const lines = text.split('\n');
-        let matchesCount = 0;
-        let htmlList = "";
-
-        lines.forEach(line => {
-          if (regexPattern.test(line)) {
-            // Conta quantas vezes aparece na mesma linha
-            const matchesInLine = line.match(regexPattern);
-            if (matchesInLine) matchesCount += matchesInLine.length;
-
-            // Destaca a palavra na linha para exibição visual
-            const highlightedText = line.replace(regexPattern, match => `<span class="highlight">${match}</span>`);
-            htmlList += `<div class="message-item">${highlightedText}</div>`;
-          }
-        });
-
-        status.innerText = "";
-        totalCount.innerText = matchesCount;
-        statsGrid.style.display = "grid";
-
-        if (matchesCount > 0) {
-          messagesList.innerHTML = `<h3 style="margin-bottom:15px; font-size:1rem; color:var(--text-muted)">Mensagens encontradas:</h3>` + htmlList;
-          messagesList.style.display = "block";
-        } else {
-          status.innerText = "Nenhuma declaração encontrada com esses padrões.";
-        }
+        status.innerText = "Arquivo carregado! Clique na lupa para buscar.";
+        searchBox.style.display = "flex";
+        
+        // Executa a busca inicial automaticamente com "eu te amo"
+        performSearch();
 
       } catch (err) {
-        status.innerText = "Erro ao processar o arquivo. Certifique-se de que é um arquivo válido do WhatsApp.";
+        status.innerText = "Erro ao carregar o arquivo.";
         console.error(err);
       }
     });
+
+    document.getElementById('searchBtn').addEventListener('click', performSearch);
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') performSearch();
+    });
+
+    function performSearch() {
+      if (!rawTextContent) return;
+
+      const query = document.getElementById('searchInput').value.trim();
+      const status = document.getElementById('status');
+      const statsGrid = document.getElementById('statsGrid');
+      const messagesList = document.getElementById('messagesList');
+      const totalCount = document.getElementById('totalCount');
+
+      if (!query) {
+        status.innerText = "Digite algo na barra de pesquisa.";
+        return;
+      }
+
+      status.innerText = "Pesquisando...";
+      messagesList.innerHTML = "";
+
+      let regexPattern;
+
+      // Se a pesquisa for relacionada a "te amo", usa o filtro inteligente de intensidade
+      const cleanQuery = query.toLowerCase().replace(/\s+/g, '');
+      if (cleanQuery.includes('teamo') || cleanQuery.includes('euteamo')) {
+        regexPattern = /\b(e+u+[\s,]*)?t+e+[\s,]+a+m+o+\b/gi;
+      } else {
+        // Para qualquer outra pesquisa padrão
+        regexPattern = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+      }
+
+      const lines = rawTextContent.split('\n');
+      let matchesCount = 0;
+      let htmlList = "";
+
+      lines.forEach(line => {
+        if (regexPattern.test(line)) {
+          const matchesInLine = line.match(regexPattern);
+          if (matchesInLine) matchesCount += matchesInLine.length;
+
+          const highlightedText = line.replace(regexPattern, match => `<span class="highlight">${match}</span>`);
+          htmlList += `<div class="message-item">${highlightedText}</div>`;
+        }
+      });
+
+      status.innerText = "";
+      totalCount.innerText = matchesCount;
+      statsGrid.style.display = "grid";
+
+      if (matchesCount > 0) {
+        messagesList.innerHTML = `<h3 style="margin-bottom:15px; font-size:1rem; color:var(--text-muted)">Mensagens com "${query}":</h3>` + htmlList;
+        messagesList.style.display = "block";
+      } else {
+        messagesList.style.display = "none";
+        status.innerText = `Nenhum resultado encontrado para "${query}".`;
+      }
+    }
   </script>
 
 </body>
