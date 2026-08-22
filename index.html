@@ -212,14 +212,14 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // COLE AQUI O CONFIG DO SEU NOVO PROJETO
+    // SUAS CHAVE DE CONFIGURAÇÃO DO NOVO PROJETO
     const firebaseConfig = {
-      apiKey: "SUA_API_KEY",
-      authDomain: "seu-projeto.firebaseapp.com",
-      projectId: "seu-projeto",
-      storageBucket: "seu-projeto.firebasestorage.app",
-      messagingSenderId: "123456789",
-      appId: "1:123456789:web:abcdef"
+      apiKey: "AIzaSyCoXUPYC0f1Hr-rN2Y9RblsWX-r-yMDsQU",
+      authDomain: "nosso-historico-amor-354c2.firebaseapp.com",
+      projectId: "nosso-historico-amor-354c2",
+      storageBucket: "nosso-historico-amor-354c2.firebasestorage.app",
+      messagingSenderId: "1009623933024",
+      appId: "1:1009623933024:web:55092a3d3fd766f234e305"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -323,20 +323,17 @@
       }, 50);
     });
 
-    // Salva dividindo em partes menores no Firestore
     btnSaveCloud.addEventListener('click', async () => {
       if (!rawFileText) return;
       try {
         statusEl.innerText = "Salvando arquivo na nuvem...";
         btnSaveCloud.disabled = true;
 
-        // Limpa partes antigas primeiro
         await clearCloudData();
 
         const now = new Date();
         const dataSalvamento = `${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 
-        // Divide o texto em blocos de 300 mil caracteres (~300KB cada)
         const CHUNK_SIZE = 300000;
         let index = 0;
         
@@ -349,7 +346,6 @@
           index++;
         }
 
-        // Salva metadados
         await setDoc(doc(db, "historico_info", "meta"), {
           fileName: currentFileName,
           dataSalvamento: dataSalvamento,
@@ -362,7 +358,7 @@
         statusEl.innerText = "";
       } catch (err) {
         console.error("Erro ao salvar:", err);
-        alert("Erro ao salvar no Firestore. Verifique as Regras do Firestore.");
+        alert("Erro ao salvar no Firestore. Lembre-se de ativar o Firestore e alterar as regras para 'if true;'.");
         statusEl.innerText = "";
       } finally {
         btnSaveCloud.disabled = false;
