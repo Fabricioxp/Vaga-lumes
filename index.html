@@ -13,10 +13,13 @@
       --text-main: #f1f5f9;
       --text-muted: #94a3b8;
       
+      /* Roxinho Cósmico (Fabricio) */
       --fabricio-bg: #2d1b4e;
       --fabricio-border: #8b5cf6;
-      --maria-bg: #102a45;
-      --maria-border: #1d4ed8;
+      
+      /* Azul Van Gogh (Maria) */
+      --maria-bg: #1c3b6f;
+      --maria-border: #3b82f6;
       
       --accent-pink: #ec4899;
     }
@@ -64,10 +67,10 @@
 
     .status-text { text-align: center; font-weight: bold; color: var(--accent-pink); margin-bottom: 15px; }
 
-    /* 1. Contador */
+    /* 1. Contador e Data de Atualização */
     .counter-section {
       text-align: center;
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(29, 78, 216, 0.15));
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.2));
       border: 1px solid var(--border);
       padding: 20px;
       border-radius: 16px;
@@ -77,6 +80,7 @@
 
     .counter-title { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
     .counter-number { font-size: 2.8rem; font-weight: 800; color: var(--accent-pink); margin: 5px 0; }
+    .last-updated { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; font-style: italic; }
 
     /* 2. Destaques das Declarações */
     .highlights-box {
@@ -149,7 +153,7 @@
     }
     .tag-btn:hover { background: var(--accent-pink); color: #fff; }
 
-    /* 4. Feed de Mensagens sem Vazamento */
+    /* 4. Feed de Mensagens */
     .chat-feed {
       display: none;
       height: 500px;
@@ -171,7 +175,6 @@
       word-wrap: break-word;
       overflow-wrap: break-word;
       word-break: break-word;
-      hyphens: auto;
     }
 
     .msg-fabricio {
@@ -203,7 +206,7 @@
       display: flex;
       justify-content: space-between;
       gap: 8px;
-      opacity: 0.8;
+      opacity: 0.85;
     }
 
     .highlight {
@@ -238,10 +241,11 @@
 
       <div id="status" class="status-text"></div>
 
-      <!-- Contador em Destaque -->
+      <!-- Contador em Destaque com Data de Envio -->
       <div id="counterSection" class="counter-section">
         <div class="counter-title">Vezes Aproximadas que dissemos "Te Amo" ❤️</div>
         <div id="counterNumber" class="counter-number">0</div>
+        <div id="lastUpdated" class="last-updated"></div>
       </div>
 
       <!-- Caixinha "Te Amo" -->
@@ -273,7 +277,7 @@
         </div>
       </div>
 
-      <!-- Feed do Chat Otimizado -->
+      <!-- Feed do Chat -->
       <div id="chatFeed" class="chat-feed"></div>
 
     </div>
@@ -297,7 +301,6 @@
       document.getElementById('dropzoneText').innerText = `📄 ${file.name}`;
       status.innerText = "Processando arquivo...";
 
-      // Usando setTimeout para evitar congelar a interface durante a leitura
       setTimeout(async () => {
         try {
           let text = "";
@@ -316,6 +319,13 @@
 
           parseWhatsAppText(text);
           renderDashboard();
+          
+          // Registrar data e hora atual do upload
+          const now = new Date();
+          const dateFormatted = now.toLocaleDateString('pt-BR');
+          const timeFormatted = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+          document.getElementById('lastUpdated').innerText = `Histórico atualizado em ${dateFormatted} às ${timeFormatted}`;
+          
           status.innerText = "";
         } catch (err) {
           status.innerText = "Erro ao processar o arquivo.";
