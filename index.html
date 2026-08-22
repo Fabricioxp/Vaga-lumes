@@ -42,7 +42,7 @@
     .file-dropzone {
       border: 2px dashed var(--border-color);
       border-radius: 14px;
-      padding: 20px;
+      padding: 24px 20px;
       text-align: center;
       cursor: pointer;
       background: #fffbfb;
@@ -56,32 +56,9 @@
       top: 0; left: 0; width: 100%; height: 100%;
       opacity: 0; cursor: pointer;
     }
-    .cloud-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-bottom: 15px;
-      flex-wrap: wrap;
-    }
-    .btn-cloud {
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 12px;
-      font-size: 0.85rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .btn-cloud:hover { background-color: #734f4b; }
-    .btn-cloud:disabled { opacity: 0.6; cursor: not-allowed; }
-    .btn-cloud-danger { background-color: #d9534f; }
-    .btn-cloud-danger:hover { background-color: #c9302c; }
     .status-text { text-align: center; font-weight: bold; color: var(--primary); margin-bottom: 10px; font-size: 0.9rem; min-height: 20px; }
     .error-text { color: #d9534f !important; }
     
-    /* BARRA DE PROGRESSO */
     .progress-container {
       width: 100%;
       background-color: #e2d1cf;
@@ -120,6 +97,7 @@
     .counter-title { font-size: 0.85rem; color: var(--secondary); text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
     .counter-number { font-size: 2.8rem; font-weight: 800; color: var(--primary); margin: 5px 0; }
     .last-updated { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; font-style: italic; }
+    
     .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .section-title { font-size: 0.95rem; font-weight: bold; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
     .btn-fullscreen {
@@ -128,17 +106,20 @@
       display: flex; align-items: center; gap: 4px; font-weight: bold; transition: all 0.2s;
     }
     .btn-fullscreen:hover { background: var(--primary); color: #fff; }
+    
     .highlights-box {
       border: 1px solid rgba(230, 179, 168, 0.5); background: #fffbfb; border-radius: 14px;
       padding: 15px; margin-bottom: 20px; display: none;
     }
     .highlights-list { max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px; }
+    
     .fullscreen-mode {
       position: fixed !important; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999;
       background: var(--bg-main) !important; border-radius: 0 !important; padding: 20px !important;
       margin: 0 !important; display: flex !important; flex-direction: column; gap: 12px;
     }
     .fullscreen-mode .highlights-list, .fullscreen-mode .chat-feed { max-height: none !important; height: 100% !important; flex: 1; }
+    
     .chat-section { display: none; flex-direction: column; gap: 12px; }
     .chat-controls { display: flex; flex-direction: column; gap: 12px; background: #fffbfb; padding: 14px; border-radius: 14px; border: 1px solid var(--border-color); }
     .search-row { display: flex; gap: 10px; align-items: center; position: relative; }
@@ -146,8 +127,10 @@
     .input-wrapper input { width: 100%; padding: 10px 12px 10px 36px; border-radius: 12px; border: 1px solid rgba(230, 179, 168, 0.6); background: #ffffff; color: var(--text-color); font-size: 0.9rem; outline: none; }
     .input-wrapper input:focus { border-color: var(--primary); }
     .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); opacity: 0.6; }
+    
     .date-row { display: flex; gap: 10px; align-items: center; font-size: 0.85rem; color: var(--secondary); flex-wrap: wrap; }
     .date-row input { background: #ffffff; border: 1px solid var(--border-color); color: var(--text-color); padding: 6px 10px; border-radius: 8px; }
+    
     .tags-container { position: relative; }
     .tag-menu-btn { background: #ffffff; border: 1px solid var(--border-color); color: var(--primary); padding: 10px 14px; border-radius: 10px; font-size: 0.85rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
     .tag-menu-btn:hover { background: var(--primary); color: #fff; }
@@ -155,6 +138,7 @@
     .tags-popover.active { display: grid; }
     .tag-item { background: #fffbfb; border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 10px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; text-align: left; }
     .tag-item:hover { background: var(--primary); color: #fff; }
+    
     .chat-feed { height: 500px; overflow-y: auto; padding: 12px; background: #fffbfb; border-radius: 14px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 12px; }
     .msg-bubble { max-width: 85%; padding: 10px 14px; border-radius: 14px; font-size: 0.9rem; line-height: 1.4; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; }
     .msg-fabricio { align-self: flex-end; background-color: var(--fabricio-bg); border: 1px solid var(--fabricio-border); color: var(--text-color); border-bottom-right-radius: 2px; }
@@ -173,11 +157,6 @@
       <div class="file-dropzone" id="dropzoneBox">
         <span id="dropzoneText">📁 Selecione a conversa do WhatsApp (.txt ou .zip)</span>
         <input type="file" id="fileInput" accept=".txt,.zip">
-      </div>
-
-      <div class="cloud-actions">
-        <button id="btnSaveCloud" class="btn-cloud" style="display: none;">☁️ Salvar Histórico na Nuvem</button>
-        <button id="btnDeleteCloud" class="btn-cloud btn-cloud-danger" style="display: none;">🗑️ Excluir Histórico</button>
       </div>
 
       <div id="status" class="status-text"></div>
@@ -244,42 +223,21 @@
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    // CONFIGURAÇÃO FIREBASE
-    const firebaseConfig = {
-      apiKey: "AIzaSyCoXUPYC0f1Hr-rN2Y9RblsWX-r-yMDsQU",
-      authDomain: "nosso-historico-amor-354c2.firebaseapp.com",
-      projectId: "nosso-historico-amor-354c2",
-      storageBucket: "nosso-historico-amor-354c2.firebasestorage.app",
-      messagingSenderId: "1009623933024",
-      appId: "1:1009623933024:web:55092a3d3fd766f234e305"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
+  <script>
     let parsedMessages = [];
     let filteredMessages = [];
     let currentPage = 1;
     const PAGE_SIZE = 100;
-    let rawFileText = "";
-    let currentFileName = "";
 
     const patternTE_AMO = /\b(?:e+u+[\s,]*)?t+e+[\s,]+a+m+o+\b/gi;
     const patternAMO_VOCE = /\ba+m+o+[\s,]+(?:v+o+c+e+|v+c+)\b/gi;
     const masterLoveRegex = new RegExp(`${patternTE_AMO.source}|${patternAMO_VOCE.source}`, 'gi');
 
     const statusEl = document.getElementById('status');
-    const btnSaveCloud = document.getElementById('btnSaveCloud');
-    const btnDeleteCloud = document.getElementById('btnDeleteCloud');
     const progressContainer = document.getElementById('progressContainer');
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
 
-    // Função utilitária para liberar a renderização da interface e impedir travamento
     const sleep = (ms = 10) => new Promise(resolve => setTimeout(resolve, ms));
 
     async function updateProgress(percent, label = "") {
@@ -287,7 +245,7 @@
       progressContainer.style.display = 'block';
       progressBar.style.width = p + '%';
       progressText.innerText = label ? `${label} (${p}%)` : `${p}%`;
-      await sleep(15); // Força o navegador a atualizar a barra visualmente
+      await sleep(5);
     }
 
     function hideProgress() {
@@ -298,89 +256,20 @@
 
     function showStatus(msg, isError = false) {
       statusEl.innerText = msg;
-      if (isError) {
-        statusEl.classList.add('error-text');
-      } else {
-        statusEl.classList.remove('error-text');
-      }
-    }
-
-    window.addEventListener('DOMContentLoaded', async () => {
-      checkCloudHistory();
-    });
-
-    async function checkCloudHistory() {
-      try {
-        showStatus("Verificando histórico na nuvem...");
-        const mainDoc = await getDoc(doc(db, "historico_info", "meta"));
-
-        if (mainDoc.exists()) {
-          const meta = mainDoc.data();
-          const totalParts = meta.totalParts || 1;
-          
-          showStatus("Carregando histórico da nuvem...");
-          await updateProgress(5, "Baixando da nuvem");
-
-          const querySnapshot = await getDocs(collection(db, "historico_partes"));
-          const chunks = [];
-          let loadedCount = 0;
-          
-          querySnapshot.forEach((docSnap) => {
-            const data = docSnap.data();
-            chunks[data.index] = data.text;
-            loadedCount++;
-          });
-
-          for (let i = 0; i < loadedCount; i++) {
-            const pct = 5 + ((i + 1) / totalParts) * 75;
-            await updateProgress(pct, "Baixando da nuvem");
-          }
-
-          const compressedBase64 = chunks.join("");
-          currentFileName = meta.fileName;
-
-          showStatus("Descompactando mensagens...");
-          await updateProgress(85, "Descompactando");
-
-          const zip = new JSZip();
-          const loadedZip = await zip.loadAsync(compressedBase64, { base64: true });
-          const txtFileName = Object.keys(loadedZip.files)[0];
-          rawFileText = await loadedZip.files[txtFileName].async("string");
-
-          showStatus("Organizando mensagens...");
-          await updateProgress(95, "Organizando");
-
-          parseWhatsAppText(rawFileText);
-          renderDashboard();
-
-          document.getElementById('dropzoneText').innerText = `☁️ Histórico Ativo: ${meta.fileName}`;
-          document.getElementById('lastUpdated').innerText = `Histórico carregado da nuvem (${meta.dataSalvamento || 'Anteriormente'})`;
-          
-          btnDeleteCloud.style.display = "inline-block";
-          btnSaveCloud.style.display = "none";
-          showStatus("");
-          hideProgress();
-        } else {
-          showStatus("");
-          hideProgress();
-        }
-      } catch (err) {
-        console.error("Erro ao carregar da nuvem:", err);
-        showStatus("Erro ao conectar à nuvem. Verifique o Firebase.", true);
-        hideProgress();
-      }
+      if (isError) statusEl.classList.add('error-text');
+      else statusEl.classList.remove('error-text');
     }
 
     document.getElementById('fileInput').addEventListener('change', async function(e) {
       const file = e.target.files[0];
       if (!file) return;
 
-      currentFileName = file.name;
       document.getElementById('dropzoneText').innerText = `📄 ${file.name}`;
       showStatus("Lendo arquivo local...");
       await updateProgress(20, "Lendo arquivo");
 
       try {
+        let rawText = "";
         if (file.name.endsWith('.zip')) {
           const zip = new JSZip();
           const zipContent = await zip.loadAsync(file);
@@ -390,23 +279,22 @@
             hideProgress();
             return;
           }
-          rawFileText = await zipContent.files[txtFile].async('string');
+          rawText = await zipContent.files[txtFile].async('string');
         } else {
-          rawFileText = await file.text();
+          rawText = await file.text();
         }
 
         await updateProgress(60, "Processando mensagens");
         showStatus("Organizando histórico...");
 
-        parseWhatsAppText(rawFileText);
+        parseWhatsAppText(rawText);
         renderDashboard();
-        
+
         const now = new Date();
         const dateFormatted = now.toLocaleDateString('pt-BR');
         const timeFormatted = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-        document.getElementById('lastUpdated').innerText = `Arquivo local aberto em ${dateFormatted} às ${timeFormatted}`;
-        
-        btnSaveCloud.style.display = "inline-block";
+        document.getElementById('lastUpdated').innerText = `Arquivo carregado em ${dateFormatted} às ${timeFormatted}`;
+
         showStatus("");
         hideProgress();
 
@@ -414,107 +302,6 @@
         showStatus("Erro ao processar o arquivo selecionado.", true);
         hideProgress();
         console.error(err);
-      }
-    });
-
-    btnSaveCloud.addEventListener('click', async () => {
-      if (!rawFileText) return;
-      btnSaveCloud.disabled = true;
-
-      try {
-        showStatus("Comprimindo histórico (isso economiza espaço e tempo)...");
-        await updateProgress(10, "Compactando");
-
-        // 1. Compactar texto do arquivo pesado
-        const zip = new JSZip();
-        zip.file("chat_historico.txt", rawFileText);
-        const base64Zip = await zip.generateAsync({
-          type: "base64",
-          compression: "DEFLATE",
-          compressionOptions: { level: 9 }
-        });
-
-        showStatus("Limpando dados antigos na nuvem...");
-        await updateProgress(25, "Preparando banco");
-        await clearCloudData();
-
-        showStatus("Salvando partes na nuvem...");
-        const now = new Date();
-        const dataSalvamento = `${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
-
-        // Pacotes seguros de 300KB
-        const CHUNK_SIZE = 300000;
-        const totalChunks = Math.ceil(base64Zip.length / CHUNK_SIZE);
-        let index = 0;
-        
-        for (let i = 0; i < base64Zip.length; i += CHUNK_SIZE) {
-          const chunk = base64Zip.substring(i, i + CHUNK_SIZE);
-          
-          // Grava no Firestore pedaço por pedaço
-          await setDoc(doc(db, "historico_partes", `parte_${index}`), {
-            index: index,
-            text: chunk
-          });
-
-          index++;
-          const percent = 25 + (index / totalChunks) * 65;
-          await updateProgress(percent, `Enviando parte ${index}/${totalChunks}`);
-        }
-
-        // Salva metadados
-        await setDoc(doc(db, "historico_info", "meta"), {
-          fileName: currentFileName,
-          dataSalvamento: dataSalvamento,
-          totalParts: index
-        });
-
-        await updateProgress(100, "Concluído!");
-        showStatus("Salvo com sucesso!");
-
-        setTimeout(() => {
-          alert("Histórico gigante salvo na nuvem com sucesso! ❤️");
-          btnSaveCloud.style.display = "none";
-          btnDeleteCloud.style.display = "inline-block";
-          showStatus("");
-          hideProgress();
-        }, 400);
-
-      } catch (err) {
-        console.error("Erro detalhado ao salvar:", err);
-        showStatus("Erro ao salvar! Verifique as Regras de Permissão do Firebase.", true);
-        alert("Erro no Firebase: " + (err.message || "Permissão negada ou erro de rede."));
-        hideProgress();
-      } finally {
-        btnSaveCloud.disabled = false;
-      }
-    });
-
-    async function clearCloudData() {
-      try {
-        const querySnapshot = await getDocs(collection(db, "historico_partes"));
-        const batch = writeBatch(db);
-        querySnapshot.forEach((d) => batch.delete(d.ref()));
-        await batch.commit();
-        await deleteDoc(doc(db, "historico_info", "meta")).catch(() => {});
-      } catch (e) {
-        console.warn("Erro ao limpar banco (pode estar vazio):", e);
-      }
-    }
-
-    btnDeleteCloud.addEventListener('click', async () => {
-      const pinDigitado = prompt("⚠️ Para excluir o histórico da nuvem, digite o PIN:");
-      if (pinDigitado !== "1566") {
-        if (pinDigitado !== null) alert("PIN incorreto!");
-        return;
-      }
-
-      try {
-        showStatus("Excluindo...");
-        await clearCloudData();
-        alert("Histórico excluído!");
-        location.reload();
-      } catch (err) {
-        alert("Erro ao excluir.");
       }
     });
 
@@ -566,7 +353,7 @@
 
       const highlightsList = document.getElementById('highlightsList');
       highlightsList.innerHTML = "";
-      
+
       loveMessages.forEach(msg => {
         const highlightedContent = msg.content.replace(masterLoveRegex, match => `<span class="highlight">${match}</span>`);
         const item = document.createElement('div');
@@ -574,10 +361,10 @@
         item.innerHTML = `<div class="msg-header"><span>${escapeHTML(msg.author)}</span><span>${msg.dateRaw} ${msg.time}</span></div><div>${highlightedContent}</div>`;
         highlightsList.appendChild(item);
       });
-      
+
       document.getElementById('highlightsBox').style.display = 'block';
       document.getElementById('chatSection').style.display = 'flex';
-      
+
       applyFilters();
     }
 
@@ -603,7 +390,7 @@
     function renderPage() {
       const chatFeed = document.getElementById('chatFeed');
       const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-      
+
       const start = (currentPage - 1) * PAGE_SIZE;
       const end = currentPage * PAGE_SIZE;
       const pageItems = filteredMessages.slice(start, end);
@@ -614,7 +401,7 @@
       pageItems.forEach(msg => {
         const item = document.createElement('div');
         item.className = `msg-bubble ${getAuthorClass(msg.author)}`;
-        
+
         let displayContent = escapeHTML(msg.content);
         if (searchTerm && searchTerm !== 'te amo') {
           const searchRegex = new RegExp(`(${escapeRegExp(searchTerm)})`, 'gi');
@@ -636,11 +423,11 @@
       }
     }
 
-    window.toggleFullscreen = function(elementId) { document.getElementById(elementId).classList.toggle('fullscreen-mode'); };
-    window.toggleTagsMenu = function(e) { e.stopPropagation(); document.getElementById('tagsPopover').classList.toggle('active'); };
+    function toggleFullscreen(elementId) { document.getElementById(elementId).classList.toggle('fullscreen-mode'); }
+    function toggleTagsMenu(e) { e.stopPropagation(); document.getElementById('tagsPopover').classList.toggle('active'); }
     document.addEventListener('click', () => { const p = document.getElementById('tagsPopover'); if (p) p.classList.remove('active'); });
-    window.applyTag = function(tag) { document.getElementById('searchInput').value = tag; document.getElementById('tagsPopover').classList.remove('active'); applyFilters(); };
-    window.clearFilters = function() { document.getElementById('searchInput').value = ""; document.getElementById('dateStart').value = ""; document.getElementById('dateEnd').value = ""; applyFilters(); };
+    function applyTag(tag) { document.getElementById('searchInput').value = tag; document.getElementById('tagsPopover').classList.remove('active'); applyFilters(); }
+    function clearFilters() { document.getElementById('searchInput').value = ""; document.getElementById('dateStart').value = ""; document.getElementById('dateEnd').value = ""; applyFilters(); }
 
     function getAuthorClass(author) {
       const name = author.toLowerCase();
@@ -649,7 +436,7 @@
       return 'msg-other';
     }
 
-    function escapeHTML(str) { return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)); }
+    function escapeHTML(str) { return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&#34;' }[tag] || tag)); }
     function escapeRegExp(string) { return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
     document.getElementById('searchInput').addEventListener('input', applyFilters);
