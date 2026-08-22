@@ -60,7 +60,7 @@
       display: flex;
       gap: 10px;
       justify-content: center;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       flex-wrap: wrap;
     }
     .btn-cloud {
@@ -77,7 +77,42 @@
     .btn-cloud:hover { background-color: #734f4b; }
     .btn-cloud-danger { background-color: #d9534f; }
     .btn-cloud-danger:hover { background-color: #c9302c; }
-    .status-text { text-align: center; font-weight: bold; color: var(--primary); margin-bottom: 15px; }
+    .status-text { text-align: center; font-weight: bold; color: var(--primary); margin-bottom: 8px; font-size: 0.9rem; }
+    
+    /* ESTILOS DA BARRA DE PROGRESSO */
+    .progress-container {
+      width: 100%;
+      background-color: #f0e2e0;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      display: none;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+      position: relative;
+      height: 22px;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #a68580, #8c625d);
+      transition: width 0.2s ease-in-out;
+      border-radius: 10px;
+    }
+    .progress-text {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    }
+
     .counter-section {
       text-align: center;
       background: linear-gradient(135deg, rgba(230, 179, 168, 0.25), rgba(140, 98, 93, 0.1));
@@ -152,6 +187,12 @@
 
       <div id="status" class="status-text"></div>
 
+      <!-- BARRA DE PROGRESSO COM PORCENTAGEM -->
+      <div id="progressContainer" class="progress-container">
+        <div id="progressBar" class="progress-bar"></div>
+        <div id="progressText" class="progress-text">0%</div>
+      </div>
+
       <div id="counterSection" class="counter-section">
         <div class="counter-title">Vezes Aproximadas que dissemos "Te Amo" ❤️</div>
         <div id="counterNumber" class="counter-number">0</div>
@@ -212,7 +253,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // SUAS CHAVE DE CONFIGURAÇÃO DO NOVO PROJETO
+    // CONFIGURAÇÃO DO FIREBASE
     const firebaseConfig = {
       apiKey: "AIzaSyCoXUPYC0f1Hr-rN2Y9RblsWX-r-yMDsQU",
       authDomain: "nosso-historico-amor-354c2.firebaseapp.com",
@@ -239,6 +280,22 @@
     const statusEl = document.getElementById('status');
     const btnSaveCloud = document.getElementById('btnSaveCloud');
     const btnDeleteCloud = document.getElementById('btnDeleteCloud');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+
+    function updateProgress(percent, label = "") {
+      const p = Math.min(100, Math.max(0, Math.round(percent)));
+      progressContainer.style.display = 'block';
+      progressBar.style.width = p + '%';
+      progressText.innerText = label ? `${label} (${p}%)` : `${p}%`;
+    }
+
+    function hideProgress() {
+      progressContainer.style.display = 'none';
+      progressBar.style.width = '0%';
+      progressText.innerText = '0%';
+    }
 
     window.addEventListener('DOMContentLoaded', async () => {
       checkCloudHistory();
@@ -252,34 +309,50 @@
 
         if (mainDoc.exists()) {
           const meta = mainDoc.data();
-          statusEl.innerText = "Baixando histórico da nuvem...";
+          const totalParts = meta.totalParts || 1;
+          
+          statusEl.innerText = "Carregando histórico da nuvem...";
+          updateProgress(0, "Baixando");
 
           const querySnapshot = await getDocs(collection(db, "historico_partes"));
           const chunks = [];
+          let loadedCount = 0;
           
-          querySnapshot.forEach((doc) => {
-            const data = doc.data();
+          querySnapshot.forEach((docSnap) => {
+            const data = docSnap.data();
             chunks[data.index] = data.text;
+            loadedCount++;
+            const pct = (loadedCount / totalParts) * 100;
+            updateProgress(pct, "Baixando");
           });
 
           rawFileText = chunks.join("");
           currentFileName = meta.fileName;
 
-          parseWhatsAppText(rawFileText);
-          renderDashboard();
+          statusEl.innerText = "Processando mensagens...";
+          updateProgress(100, "Processando");
 
-          document.getElementById('dropzoneText').innerText = `☁️ Histórico Ativo: ${meta.fileName}`;
-          document.getElementById('lastUpdated').innerText = `Histórico carregado da nuvem (${meta.dataSalvamento || 'Anteriormente'})`;
-          
-          btnDeleteCloud.style.display = "inline-block";
-          btnSaveCloud.style.display = "none";
-          statusEl.innerText = "";
+          setTimeout(() => {
+            parseWhatsAppText(rawFileText);
+            renderDashboard();
+
+            document.getElementById('dropzoneText').innerText = `☁️ Histórico Ativo: ${meta.fileName}`;
+            document.getElementById('lastUpdated').innerText = `Histórico carregado da nuvem (${meta.dataSalvamento || 'Anteriormente'})`;
+            
+            btnDeleteCloud.style.display = "inline-block";
+            btnSaveCloud.style.display = "none";
+            statusEl.innerText = "";
+            hideProgress();
+          }, 100);
+
         } else {
           statusEl.innerText = "";
+          hideProgress();
         }
       } catch (err) {
         console.error("Erro ao carregar nuvem:", err);
         statusEl.innerText = "";
+        hideProgress();
       }
     }
 
@@ -289,7 +362,8 @@
 
       currentFileName = file.name;
       document.getElementById('dropzoneText').innerText = `📄 ${file.name}`;
-      statusEl.innerText = "Processando arquivo...";
+      statusEl.innerText = "Lendo arquivo local...";
+      updateProgress(30, "Lendo");
 
       setTimeout(async () => {
         try {
@@ -299,6 +373,7 @@
             const txtFile = Object.keys(zipContent.files).find(name => name.endsWith('.txt'));
             if (!txtFile) {
               statusEl.innerText = "Arquivo .txt não encontrado no .zip.";
+              hideProgress();
               return;
             }
             rawFileText = await zipContent.files[txtFile].async('string');
@@ -306,18 +381,26 @@
             rawFileText = await file.text();
           }
 
-          parseWhatsAppText(rawFileText);
-          renderDashboard();
-          
-          const now = new Date();
-          const dateFormatted = now.toLocaleDateString('pt-BR');
-          const timeFormatted = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-          document.getElementById('lastUpdated').innerText = `Arquivo local aberto em ${dateFormatted} às ${timeFormatted}`;
-          
-          btnSaveCloud.style.display = "inline-block";
-          statusEl.innerText = "";
+          updateProgress(70, "Processando");
+          statusEl.innerText = "Organizando histórico...";
+
+          setTimeout(() => {
+            parseWhatsAppText(rawFileText);
+            renderDashboard();
+            
+            const now = new Date();
+            const dateFormatted = now.toLocaleDateString('pt-BR');
+            const timeFormatted = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('lastUpdated').innerText = `Arquivo local aberto em ${dateFormatted} às ${timeFormatted}`;
+            
+            btnSaveCloud.style.display = "inline-block";
+            statusEl.innerText = "";
+            hideProgress();
+          }, 100);
+
         } catch (err) {
           statusEl.innerText = "Erro ao processar o arquivo.";
+          hideProgress();
           console.error(err);
         }
       }, 50);
@@ -326,15 +409,17 @@
     btnSaveCloud.addEventListener('click', async () => {
       if (!rawFileText) return;
       try {
-        statusEl.innerText = "Salvando arquivo na nuvem...";
+        statusEl.innerText = "Iniciando envio para a nuvem...";
         btnSaveCloud.disabled = true;
+        updateProgress(0, "Enviando");
 
         await clearCloudData();
 
         const now = new Date();
         const dataSalvamento = `${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 
-        const CHUNK_SIZE = 300000;
+        const CHUNK_SIZE = 300000; // ~300KB por parte
+        const totalChunks = Math.ceil(rawFileText.length / CHUNK_SIZE);
         let index = 0;
         
         for (let i = 0; i < rawFileText.length; i += CHUNK_SIZE) {
@@ -344,6 +429,8 @@
             text: chunk
           });
           index++;
+          const percent = (index / totalChunks) * 100;
+          updateProgress(percent, "Enviando");
         }
 
         await setDoc(doc(db, "historico_info", "meta"), {
@@ -352,14 +439,20 @@
           totalParts: index
         });
 
-        alert("Histórico salvo na nuvem com sucesso! ❤️");
-        btnSaveCloud.style.display = "none";
-        btnDeleteCloud.style.display = "inline-block";
-        statusEl.innerText = "";
+        updateProgress(100, "Concluído!");
+        setTimeout(() => {
+          alert("Histórico salvo na nuvem com sucesso! ❤️");
+          btnSaveCloud.style.display = "none";
+          btnDeleteCloud.style.display = "inline-block";
+          statusEl.innerText = "";
+          hideProgress();
+        }, 300);
+
       } catch (err) {
         console.error("Erro ao salvar:", err);
-        alert("Erro ao salvar no Firestore. Lembre-se de ativar o Firestore e alterar as regras para 'if true;'.");
+        alert("Erro ao salvar no Firestore. Verifique as Regras do Firestore.");
         statusEl.innerText = "";
+        hideProgress();
       } finally {
         btnSaveCloud.disabled = false;
       }
@@ -393,7 +486,7 @@
     function parseWhatsAppText(text) {
       parsedMessages = [];
       const lines = text.split('\n');
-      const msgRegex = /^\[?(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4}),?\s+(\d{1,2}:\d{2}(?::\d{2})?(?:\s?[AP]M)?)\]?\s*(?:-|\|)?\s*([^:]+):\s*(.*)$/i;
+      const msgRegex = /^\[?(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4}),?\s+(\d{1,2}:\d{2}(?::\d{2})?(?:\s?[AP]M)?)\]?\s*(?:-|\Live)?\s*([^:]+):\s*(.*)$/i;
 
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
