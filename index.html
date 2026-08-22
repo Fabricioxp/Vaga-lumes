@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Buscador de Conversas do WhatsApp 🔍❤️</title>
+  <title>Contador de Amor do WhatsApp ❤️</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
     :root {
@@ -46,11 +46,11 @@
     .file-dropzone {
       border: 2px dashed var(--primary);
       border-radius: 12px;
-      padding: 25px 20px;
+      padding: 30px 20px;
       cursor: pointer;
       background: rgba(236, 72, 153, 0.05);
       position: relative;
-      margin-bottom: 20px;
+      transition: all 0.2s ease;
     }
 
     .file-dropzone:hover { background: rgba(236, 72, 153, 0.1); }
@@ -61,83 +61,31 @@
       opacity: 0; cursor: pointer;
     }
 
-    .search-box {
-      display: flex;
-      gap: 10px;
-      margin-top: 15px;
-      display: none;
-    }
+    .status-text { margin-top: 15px; font-weight: 500; color: var(--primary); }
 
-    .input-wrapper {
-      position: relative;
-      flex: 1;
-    }
-
-    .input-wrapper input {
-      width: 100%;
-      padding: 12px 16px 12px 42px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background-color: #0f172a;
-      color: #fff;
-      font-size: 1rem;
-      box-sizing: border-box;
-      outline: none;
-    }
-
-    .input-wrapper input:focus {
-      border-color: var(--primary);
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 1.1rem;
-      color: var(--text-muted);
-    }
-
-    .search-btn {
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      padding: 0 20px;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .search-btn:hover {
-      background-color: var(--primary-hover);
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 15px;
-      margin-top: 25px;
+    /* Seção de Resultados na Parte Inferior */
+    .results-container {
+      margin-top: 30px;
       display: none;
     }
 
     .stat-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border);
-      padding: 16px;
-      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(30, 41, 59, 0.5));
+      border: 1px solid var(--primary);
+      padding: 20px;
+      border-radius: 14px;
       text-align: center;
+      margin-bottom: 25px;
     }
 
-    .stat-number { font-size: 1.8rem; font-weight: bold; color: var(--primary); }
-    .stat-label { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+    .stat-number { font-size: 2.8rem; font-weight: 800; color: var(--primary); }
+    .stat-label { font-size: 0.95rem; color: var(--text-main); margin-top: 4px; }
 
     .messages-list {
-      margin-top: 25px;
       text-align: left;
-      max-height: 400px;
+      max-height: 450px;
       overflow-y: auto;
-      display: none;
+      padding-right: 5px;
     }
 
     .message-item {
@@ -148,6 +96,7 @@
       margin-bottom: 10px;
       font-size: 0.9rem;
       line-height: 1.4;
+      word-break: break-word;
     }
 
     .highlight {
@@ -157,58 +106,54 @@
       padding: 2px 6px;
       border-radius: 4px;
     }
-
-    .status-text { margin-top: 15px; font-weight: 500; color: var(--primary); }
   </style>
 </head>
 <body>
 
   <div class="container">
     <div class="card">
-      <h1>Lupa do Amor 🔍❤️</h1>
-      <p class="subtitle">Faça upload da conversa e busque por declarações de amor com qualquer variação de intensidade!</p>
+      <h1>Contador de Amor ❤️</h1>
+      <p class="subtitle">Envie o arquivo exportado do WhatsApp (.txt ou .zip) para ver todas as declarações e variações de intensidade!</p>
 
       <div class="file-dropzone">
-        <span id="dropzoneText">📁 Selecione a conversa exportada (.txt ou .zip)</span>
+        <span id="dropzoneText">📁 Selecione a conversa exportada</span>
         <input type="file" id="fileInput" accept=".txt,.zip">
-      </div>
-
-      <div id="searchBox" class="search-box">
-        <div class="input-wrapper">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="searchInput" value="eu te amo" placeholder="Digite o termo de busca...">
-        </div>
-        <button id="searchBtn" class="search-btn">Buscar</button>
       </div>
 
       <div id="status" class="status-text"></div>
 
-      <div id="statsGrid" class="stats-grid">
+      <!-- Área de resultados abaixo -->
+      <div id="resultsContainer" class="results-container">
         <div class="stat-card">
           <div id="totalCount" class="stat-number">0</div>
-          <div class="stat-label">Declarações Encontradas</div>
+          <div class="stat-label">Declarações "Te Amo" encontradas</div>
         </div>
+
+        <div id="messagesList" class="messages-list"></div>
       </div>
 
-      <div id="messagesList" class="messages-list"></div>
     </div>
   </div>
 
   <script>
-    let rawTextContent = "";
-
     document.getElementById('fileInput').addEventListener('change', async function(e) {
       const file = e.target.files[0];
       if (!file) return;
 
       const status = document.getElementById('status');
       const dropzoneText = document.getElementById('dropzoneText');
-      const searchBox = document.getElementById('searchBox');
+      const resultsContainer = document.getElementById('resultsContainer');
+      const messagesList = document.getElementById('messagesList');
+      const totalCount = document.getElementById('totalCount');
 
       dropzoneText.innerText = `📄 ${file.name}`;
-      status.innerText = "Carregando histórico...";
+      status.innerText = "Analisando histórico de conversas...";
+      resultsContainer.style.display = "none";
+      messagesList.innerHTML = "";
 
       try {
+        let text = "";
+
         if (file.name.endsWith('.zip')) {
           const zip = new JSZip();
           const zipContent = await zip.loadAsync(file);
@@ -218,82 +163,45 @@
             status.innerText = "Nenhum arquivo .txt encontrado no .zip.";
             return;
           }
-          rawTextContent = await zipContent.files[txtFile].async('string');
+          text = await zipContent.files[txtFile].async('string');
         } else {
-          rawTextContent = await file.text();
+          text = await file.text();
         }
 
-        status.innerText = "Arquivo carregado! Clique na lupa para buscar.";
-        searchBox.style.display = "flex";
-        performSearch();
+        // Captura todas as variações com intensidade e acentuações:
+        // - "eu" opcional com vogais repetidas (ex: eeeuuuu, eúuu)
+        // - "te" com letras repetidas (ex: teee, tteee)
+        // - "amo" com letras repetidas (ex: amooo, aammmooo)
+        const regexPattern = /(?:[eéèêé]+[uú]+[\s,]*)?[tT]+[eéèêé]+[\s,]+[aáàâãá]+[mM]+[oóòôõó]+/gi;
+
+        const lines = text.split('\n');
+        let matchesCount = 0;
+        let htmlList = "";
+
+        lines.forEach(line => {
+          const matchesInLine = line.match(regexPattern);
+          if (matchesInLine) {
+            matchesCount += matchesInLine.length;
+            const highlightedText = line.replace(regexPattern, match => `<span class="highlight">${match}</span>`);
+            htmlList += `<div class="message-item">${highlightedText}</div>`;
+          }
+        });
+
+        status.innerText = "";
+        totalCount.innerText = matchesCount;
+
+        if (matchesCount > 0) {
+          messagesList.innerHTML = `<h3 style="margin-bottom:15px; font-size:1rem; color:var(--text-muted)">Histórico de Mensagens:</h3>` + htmlList;
+          resultsContainer.style.display = "block";
+        } else {
+          status.innerText = "Nenhuma variação de \"te amo\" foi encontrada na conversa.";
+        }
 
       } catch (err) {
-        status.innerText = "Erro ao carregar o arquivo.";
+        status.innerText = "Erro ao ler o arquivo. Certifique-se de que é um arquivo válido do WhatsApp.";
         console.error(err);
       }
     });
-
-    document.getElementById('searchBtn').addEventListener('click', performSearch);
-    document.getElementById('searchInput').addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') performSearch();
-    });
-
-    function performSearch() {
-      if (!rawTextContent) return;
-
-      const query = document.getElementById('searchInput').value.trim();
-      const status = document.getElementById('status');
-      const statsGrid = document.getElementById('statsGrid');
-      const messagesList = document.getElementById('messagesList');
-      const totalCount = document.getElementById('totalCount');
-
-      if (!query) {
-        status.innerText = "Digite algo na barra de pesquisa.";
-        return;
-      }
-
-      status.innerText = "Pesquisando...";
-      messagesList.innerHTML = "";
-
-      let regexPattern;
-      const queryLower = query.toLowerCase();
-
-      // Se a busca contiver termos comuns de amor, ativa a captura universal de intensidade
-      if (queryLower.includes('amo') || queryLower.includes('te')) {
-        // Padrão que aceita:
-        // (opcional): e+u+ (euuu, eeeuu, etc)
-        // t+e+ (teee, ttte, etc)
-        // a+m+o+ (amooo, aammmooo, etc)
-        regexPattern = /(?:[eéèé]+[uú]+[\s,]*)?[tT]+[eéèé]+[\s,]+[aáàâãá]+[mM]+[oóòôõó]+/gi;
-      } else {
-        regexPattern = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-      }
-
-      const lines = rawTextContent.split('\n');
-      let matchesCount = 0;
-      let htmlList = "";
-
-      lines.forEach(line => {
-        const matchesInLine = line.match(regexPattern);
-        if (matchesInLine) {
-          matchesCount += matchesInLine.length;
-          const highlightedText = line.replace(regexPattern, match => `<span class="highlight">${match}</span>`);
-          htmlList += `<div class="message-item">${highlightedText}</div>`;
-        }
-      });
-
-      status.innerText = "";
-      totalCount.innerText = matchesCount;
-      statsGrid.style.display = "grid";
-
-      if (matchesCount > 0) {
-        messagesList.innerHTML = `<h3 style="margin-bottom:15px; font-size:1rem; color:var(--text-muted)">Todas as variações encontradas:</h3>` + htmlList;
-        messagesList.style.display = "block";
-      } else {
-        messagesList.style.display = "none";
-        status.innerText = `Nenhum resultado encontrado para "${query}".`;
-      }
-    }
   </script>
 
 </body>
