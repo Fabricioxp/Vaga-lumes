@@ -158,15 +158,16 @@
           text = await file.text();
         }
 
-        // Padrões de captura flexíveis para intensidades:
-        // 1. "eu" + "te" + "amo" (ex: euuu teee amooo, eú te amo)
-        // 2. "te" + "amo" (ex: teee amooo)
-        // 3. "amo" + "você/voce/vc" (ex: amooo vocêe, amooo vccc, amoo vc)
-        const patternEU_TE_AMO = /(?:[eéèêé]+[uú]+[\s,]*)?[tT]+[eéèêé]+[\s,]+[aáàâãá]+[mM]+[oóòôõó]+/gi;
-        const patternAMO_VOCE = /[aáàâãá]+[mM]+[oóòôõó]+[\s,]+(?:[vV]+[oóòôõó]+[cC]+[eéèêé]*|[vV]+[cC]+)/gi;
+        // REGEX ULTRA PRECISA:
+        // Exige limites estritos (\b) e impede que pegue palavras como "amor", "amigo", "cuide"
+        
+        // 1. "eu te amo" / "te amo" (ex: euuu teee amooo, teee amoo)
+        const patternTE_AMO = /\b(?:e+u+[\s,]*)?t+e+[\s,]+a+m+o+\b/gi;
+        
+        // 2. "amo você" / "amo vc" (ex: amooo vocêee, amoo vccc, amoo vc)
+        const patternAMO_VOCE = /\ba+m+o+[\s,]+(?:v+o+c+e+|v+c+)\b/gi;
 
-        // Combina ambas as buscas em uma só regra
-        const masterRegex = new RegExp(`${patternEU_TE_AMO.source}|${patternAMO_VOCE.source}`, 'gi');
+        const masterRegex = new RegExp(`${patternTE_AMO.source}|${patternAMO_VOCE.source}`, 'gi');
 
         const lines = text.split('\n');
         let matchesCount = 0;
