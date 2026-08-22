@@ -293,6 +293,7 @@
       word-wrap: break-word;
       overflow-wrap: break-word;
       word-break: break-word;
+      white-space: pre-wrap;
     }
 
     .msg-fabricio {
@@ -461,7 +462,6 @@
     const btnSaveCloud = document.getElementById('btnSaveCloud');
     const btnDeleteCloud = document.getElementById('btnDeleteCloud');
 
-    // Verificar se existe histórico salvo na nuvem ao carregar a página
     window.addEventListener('DOMContentLoaded', async () => {
       checkCloudHistory();
     });
@@ -493,7 +493,7 @@
         }
       } catch (err) {
         console.error("Erro ao carregar nuvem:", err);
-        statusEl.innerText = "";
+        statusEl.innerText = "Erro ao carregar da nuvem. Verifique o Firebase Storage.";
       }
     }
 
@@ -538,14 +538,14 @@
       }, 50);
     });
 
-    // Salvar na Nuvem
+    // Salvar na Nuvem (Storage + Firestore)
     btnSaveCloud.addEventListener('click', async () => {
       if (!currentFileObj) return;
       try {
         statusEl.innerText = "Enviando arquivo para a nuvem... Aguarde.";
         btnSaveCloud.disabled = true;
 
-        const storageRef = ref(storage, `historico/${Date.now()}_${currentFileObj.name}`);
+        const storageRef = ref(storage, `historicos/${Date.now()}_${currentFileObj.name}`);
         await uploadBytes(storageRef, currentFileObj);
         const downloadURL = await getDownloadURL(storageRef);
 
@@ -605,8 +605,10 @@
 
     function parseWhatsAppText(text) {
       parsedMessages = [];
-      const lines = text.split('\n');
-      const msgRegex = /^\[?(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s(\d{1,2}:\d{2}(?::\d{2})?)\]?\s-?\s?([^:]+):\s(.*)$/;
+      const lines = text.split(/\r?\n/);
+
+      // Expressão regular universal ajustada para iOS e Android
+      const msgRegex = /^\[?(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4}),?\s+(\d{1,2}:\d{2}(?::\d{2})?(?:\s?[AP]M)?)\]?\s*(?:-|\|)?\s*([^:]+):\s*(.*)$/i;
 
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
@@ -615,12 +617,11 @@
         if (match) {
           const content = match[4].trim();
 
-          // REMOÇÃO DE MÍDIA OCULTA / ARQUIVO OCULTO
           if (/<mídia\s+oculta>|<arquivo\s+de\s+mídia\s+oculto>|<media\s+omitted>/gi.test(content)) {
             continue;
           }
 
-          const dateParts = match[1].split('/');
+          const dateParts = match[1].split(/[\/\.-]/);
           let isoDate = "";
           if (dateParts.length === 3) {
             let year = dateParts[2].length === 2 ? '20' + dateParts[2] : dateParts[2];
@@ -638,7 +639,7 @@
           });
         } else if (parsedMessages.length > 0) {
           const extraLine = line.trim();
-          if (!/<mídia\s+oculta>|<arquivo\s+de\s+mídia\s+oculto>|<media\s+omitted>/gi.test(extraLine)) {
+          if (extraLine && !/<mídia\s+oculta>|<arquivo\s+de\s+mídia\s+oculto>|<media\s+omitted>/gi.test(extraLine)) {
             parsedMessages[parsedMessages.length - 1].content += "\n" + extraLine;
           }
         }
