@@ -3,17 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contador de Amor do WhatsApp ❤️</title>
+  <title>Nosso Histórico de Amor ❤️</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
     :root {
-      --bg-color: #0f172a;
-      --card-bg: #1e293b;
-      --primary: #ec4899;
-      --text-main: #f8fafc;
+      --bg-color: #0b0f19;
+      --card-bg: #151c2e;
+      --border: #243049;
+      --text-main: #f1f5f9;
       --text-muted: #94a3b8;
-      --border: #334155;
+      
+      /* Cores das Mensagens */
+      --fabricio-bg: #2d1b4e;
+      --fabricio-border: #8b5cf6;
+      --maria-bg: #102a45;
+      --maria-border: #1d4ed8;
+      
+      --accent-pink: #ec4899;
     }
+
+    * { box-sizing: border-box; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -25,27 +34,25 @@
       justify-content: center;
     }
 
-    .container { max-width: 650px; width: 100%; }
+    .container { max-width: 800px; width: 100%; }
 
     .card {
       background-color: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 28px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-      text-align: center;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
 
-    h1 { margin: 0 0 10px 0; font-size: 1.8rem; color: #fff; }
-    p.subtitle { color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem; }
-
     .file-dropzone {
-      border: 2px dashed var(--primary);
-      border-radius: 12px;
-      padding: 30px 20px;
+      border: 2px dashed var(--accent-pink);
+      border-radius: 14px;
+      padding: 25px 20px;
+      text-align: center;
       cursor: pointer;
       background: rgba(236, 72, 153, 0.05);
       position: relative;
+      margin-bottom: 20px;
     }
 
     .file-dropzone:hover { background: rgba(236, 72, 153, 0.1); }
@@ -56,46 +63,154 @@
       opacity: 0; cursor: pointer;
     }
 
-    .status-text { margin-top: 15px; font-weight: 500; color: var(--primary); }
+    .status-text { text-align: center; font-weight: bold; color: var(--accent-pink); margin-bottom: 15px; }
 
-    .results-container { margin-top: 30px; display: none; }
-
-    .stat-card {
-      background: linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(30, 41, 59, 0.6));
-      border: 1px solid var(--primary);
-      padding: 20px;
-      border-radius: 14px;
+    /* Seção Superior: Contador */
+    .counter-section {
       text-align: center;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(29, 78, 216, 0.15));
+      border: 1px solid var(--border);
+      padding: 20px;
+      border-radius: 16px;
       margin-bottom: 25px;
+      display: none;
     }
 
-    .stat-number { font-size: 3rem; font-weight: 800; color: var(--primary); }
-    .stat-label { font-size: 0.95rem; color: var(--text-main); margin-top: 4px; }
+    .counter-title { font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+    .counter-number { font-size: 3.2rem; font-weight: 800; color: var(--accent-pink); margin: 5px 0; }
 
-    .messages-list {
-      text-align: left;
-      max-height: 450px;
+    /* Caixa de Destaque para "Te Amo" */
+    .highlights-box {
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 14px;
+      padding: 15px;
+      margin-bottom: 25px;
+      display: none;
+    }
+
+    .highlights-title { font-size: 0.95rem; font-weight: bold; color: var(--text-muted); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+    .highlights-list {
+      max-height: 200px;
       overflow-y: auto;
-      padding-right: 5px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
-    .message-item {
-      background: #0f172a;
-      border-left: 4px solid var(--primary);
-      padding: 12px 16px;
-      border-radius: 0 8px 8px 0;
-      margin-bottom: 10px;
+    /* Filtros e Busca para o Chat Completo */
+    .chat-controls {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .search-row { display: flex; gap: 10px; }
+    
+    .input-wrapper { position: relative; flex: 1; }
+    .input-wrapper input {
+      width: 100%;
+      padding: 10px 12px 10px 36px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-color);
+      color: #fff;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); opacity: 0.6; }
+
+    .date-row { display: flex; gap: 10px; align-items: center; font-size: 0.85rem; color: var(--text-muted); }
+    .date-row input {
+      background: var(--bg-color);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 6px;
+    }
+
+    .tags-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    .tag-btn {
+      background: var(--border);
+      border: none;
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tag-btn:hover { background: var(--accent-pink); color: #fff; }
+
+    /* Feed do Chat Completo */
+    .chat-feed {
+      display: none;
+      max-height: 550px;
+      overflow-y: auto;
+      padding-right: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .msg-bubble {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 12px;
       font-size: 0.9rem;
       line-height: 1.4;
+      position: relative;
       word-break: break-word;
+    }
+
+    /* Visual Fabricio: Roxinho Cósmico */
+    .msg-fabricio {
+      align-self: flex-end;
+      background-color: var(--fabricio-bg);
+      border: 1px solid var(--fabricio-border);
+      border-bottom-right-radius: 2px;
+    }
+
+    /* Visual Maria: Azul Van Gogh */
+    .msg-maria {
+      align-self: flex-start;
+      background-color: var(--maria-bg);
+      border: 1px solid var(--maria-border);
+      border-bottom-left-radius: 2px;
+    }
+
+    /* Outras mensagens do sistema ou indefinidas */
+    .msg-other {
+      align-self: center;
+      background-color: #1e293b;
+      border: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .msg-header {
+      font-size: 0.75rem;
+      font-weight: bold;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      opacity: 0.8;
     }
 
     .highlight {
       background-color: rgba(236, 72, 153, 0.4);
-      color: #f472b6;
+      color: #fff;
       font-weight: bold;
-      padding: 2px 6px;
-      border-radius: 4px;
+      padding: 1px 4px;
+      border-radius: 3px;
     }
   </style>
 </head>
@@ -103,54 +218,79 @@
 
   <div class="container">
     <div class="card">
-      <h1>Contador de Amor ❤️</h1>
-      <p class="subtitle">Selecione o arquivo da conversa do WhatsApp (.txt ou .zip)</p>
-
       <div class="file-dropzone">
-        <span id="dropzoneText">📁 Clique ou arraste a conversa aqui</span>
+        <span id="dropzoneText">📁 Selecione a conversa do WhatsApp (.txt ou .zip)</span>
         <input type="file" id="fileInput" accept=".txt,.zip">
       </div>
 
       <div id="status" class="status-text"></div>
 
-      <div id="resultsContainer" class="results-container">
-        <div class="stat-card">
-          <div id="totalCount" class="stat-number">0</div>
-          <div class="stat-label">Declarações encontradas</div>
+      <!-- 1. Contador em Destaque -->
+      <div id="counterSection" class="counter-section">
+        <div class="counter-title">Vezes Aproximadas que dissemos "Te Amo" ❤️</div>
+        <div id="counterNumber" class="counter-number">0</div>
+      </div>
+
+      <!-- 2. Caixinha de Mensagens "Te Amo" Encontradas -->
+      <div id="highlightsBox" class="highlights-box">
+        <div class="highlights-title">💖 Declarações Encontradas no Histórico:</div>
+        <div id="highlightsList" class="highlights-list"></div>
+      </div>
+
+      <!-- 3. Controles de Busca e Filtros para o Chat -->
+      <div id="chatControls" class="chat-controls">
+        <div class="search-row">
+          <div class="input-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Pesquisar termo no chat completo...">
+          </div>
         </div>
 
-        <div id="messagesList" class="messages-list"></div>
+        <div class="date-row">
+          <label>De: <input type="date" id="dateStart"></label>
+          <label>Até: <input type="date" id="dateEnd"></label>
+        </div>
+
+        <div class="tags-row">
+          <button class="tag-btn" onclick="applyTag('te amo')">❤️ Te Amo</button>
+          <button class="tag-btn" onclick="applyTag('saudade')">🥺 Saudades</button>
+          <button class="tag-btn" onclick="applyTag('bom dia')">☀️ Bom dia</button>
+          <button class="tag-btn" onclick="applyTag('boa noite')">🌙 Boa noite</button>
+          <button class="tag-btn" onclick="clearFilters()">🔄 Limpar Filtros</button>
+        </div>
       </div>
+
+      <!-- 4. Chat Completo com Rolagem -->
+      <div id="chatFeed" class="chat-feed"></div>
 
     </div>
   </div>
 
   <script>
+    let parsedMessages = [];
+
+    // Regex ultra-precisa para declarações com intensificação
+    const patternTE_AMO = /\b(?:e+u+[\s,]*)?t+e+[\s,]+a+m+o+\b/gi;
+    const patternAMO_VOCE = /\ba+m+o+[\s,]+(?:v+o+c+e+|v+c+)\b/gi;
+    const masterLoveRegex = new RegExp(`${patternTE_AMO.source}|${patternAMO_VOCE.source}`, 'gi');
+
     document.getElementById('fileInput').addEventListener('change', async function(e) {
       const file = e.target.files[0];
       if (!file) return;
 
       const status = document.getElementById('status');
       const dropzoneText = document.getElementById('dropzoneText');
-      const resultsContainer = document.getElementById('resultsContainer');
-      const messagesList = document.getElementById('messagesList');
-      const totalCount = document.getElementById('totalCount');
-
       dropzoneText.innerText = `📄 ${file.name}`;
-      status.innerText = "Processando mensagens...";
-      resultsContainer.style.display = "none";
-      messagesList.innerHTML = "";
+      status.innerText = "Lendo e organizando histórico...";
 
       try {
         let text = "";
-
         if (file.name.endsWith('.zip')) {
           const zip = new JSZip();
           const zipContent = await zip.loadAsync(file);
           const txtFile = Object.keys(zipContent.files).find(name => name.endsWith('.txt'));
-          
           if (!txtFile) {
-            status.innerText = "Nenhum arquivo de conversa encontrado no .zip.";
+            status.innerText = "Arquivo de texto não encontrado dentro do .zip.";
             return;
           }
           text = await zipContent.files[txtFile].async('string');
@@ -158,45 +298,175 @@
           text = await file.text();
         }
 
-        // REGEX ULTRA PRECISA:
-        // Exige limites estritos (\b) e impede que pegue palavras como "amor", "amigo", "cuide"
-        
-        // 1. "eu te amo" / "te amo" (ex: euuu teee amooo, teee amoo)
-        const patternTE_AMO = /\b(?:e+u+[\s,]*)?t+e+[\s,]+a+m+o+\b/gi;
-        
-        // 2. "amo você" / "amo vc" (ex: amooo vocêee, amoo vccc, amoo vc)
-        const patternAMO_VOCE = /\ba+m+o+[\s,]+(?:v+o+c+e+|v+c+)\b/gi;
-
-        const masterRegex = new RegExp(`${patternTE_AMO.source}|${patternAMO_VOCE.source}`, 'gi');
-
-        const lines = text.split('\n');
-        let matchesCount = 0;
-        let htmlList = "";
-
-        lines.forEach(line => {
-          const matchesInLine = line.match(masterRegex);
-          if (matchesInLine) {
-            matchesCount += matchesInLine.length;
-            const highlightedText = line.replace(masterRegex, match => `<span class="highlight">${match}</span>`);
-            htmlList += `<div class="message-item">${highlightedText}</div>`;
-          }
-        });
-
+        parseWhatsAppText(text);
+        renderDashboard();
         status.innerText = "";
-        totalCount.innerText = matchesCount;
-
-        if (matchesCount > 0) {
-          messagesList.innerHTML = `<h3 style="margin-bottom:15px; font-size:1rem; color:var(--text-muted)">Mensagens encontradas:</h3>` + htmlList;
-          resultsContainer.style.display = "block";
-        } else {
-          status.innerText = "Nenhuma declaração foi encontrada no arquivo.";
-        }
 
       } catch (err) {
-        status.innerText = "Erro ao processar o arquivo.";
+        status.innerText = "Erro ao processar o arquivo. Verifique se o formato é válido.";
         console.error(err);
       }
     });
+
+    // Função de tratamento do texto bruto exportado do WhatsApp
+    function parseWhatsAppText(text) {
+      parsedMessages = [];
+      const lines = text.split('\n');
+      
+      // Regex genérica para extrair Data, Hora, Autor e Conteúdo da Mensagem
+      const msgRegex = /^\[?(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s(\d{1,2}:\d{2}(?::\d{2})?)\]?\s-?\s?([^:]+):\s(.*)$/;
+
+      lines.forEach(line => {
+        const match = line.match(msgRegex);
+        if (match) {
+          const dateStr = match[1];
+          const timeStr = match[2];
+          const authorStr = match[3].trim();
+          const contentStr = match[4].trim();
+
+          // Converter data DD/MM/AAAA para AAAA-MM-DD
+          const dateParts = dateStr.split('/');
+          let isoDate = "";
+          if(dateParts.length === 3) {
+            let year = dateParts[2].length === 2 ? '20' + dateParts[2] : dateParts[2];
+            let month = dateParts[1].padStart(2, '0');
+            let day = dateParts[0].padStart(2, '0');
+            isoDate = `${year}-${month}-${day}`;
+          }
+
+          parsedMessages.push({
+            date: isoDate,
+            dateRaw: dateStr,
+            time: timeStr,
+            author: authorStr,
+            content: contentStr
+          });
+        } else if (parsedMessages.length > 0) {
+          // Quebras de linha pertencentes à mensagem anterior
+          parsedMessages[parsedMessages.length - 1].content += "\n" + line.trim();
+        }
+      });
+    }
+
+    function renderDashboard() {
+      let loveCount = 0;
+      const loveMessages = [];
+
+      parsedMessages.forEach(msg => {
+        const matches = msg.content.match(masterLoveRegex);
+        if (matches) {
+          loveCount += matches.length;
+          loveMessages.push(msg);
+        }
+      });
+
+      // 1. Atualizar Contador
+      document.getElementById('counterNumber').innerText = loveCount;
+      document.getElementById('counterSection').style.display = 'block';
+
+      // 2. Renderizar Caixinha "Te Amo"
+      const highlightsList = document.getElementById('highlightsList');
+      highlightsList.innerHTML = "";
+      
+      loveMessages.forEach(msg => {
+        const highlightedContent = msg.content.replace(masterLoveRegex, match => `<span class="highlight">${match}</span>`);
+        const item = document.createElement('div');
+        item.className = `msg-bubble ${getAuthorClass(msg.author)}`;
+        item.innerHTML = `
+          <div class="msg-header">
+            <span>${msg.author}</span>
+            <span>${msg.dateRaw} ${msg.time}</span>
+          </div>
+          <div>${highlightedContent}</div>
+        `;
+        highlightsList.appendChild(item);
+      });
+      document.getElementById('highlightsBox').style.display = 'block';
+
+      // 3. Exibir Controles e Chat
+      document.getElementById('chatControls').style.display = 'flex';
+      document.getElementById('chatFeed').style.display = 'flex';
+      
+      filterAndRenderChat();
+    }
+
+    // Filtra e exibe o chat completo
+    function filterAndRenderChat() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const dateStart = document.getElementById('dateStart').value;
+      const dateEnd = document.getElementById('dateEnd').value;
+      const chatFeed = document.getElementById('chatFeed');
+
+      chatFeed.innerHTML = "";
+
+      const filtered = parsedMessages.filter(msg => {
+        // Filtro de Texto
+        let matchesText = true;
+        if (searchTerm) {
+          if (searchTerm === 'te amo') {
+            matchesText = masterLoveRegex.test(msg.content);
+          } else {
+            matchesText = msg.content.toLowerCase().includes(searchTerm);
+          }
+        }
+
+        // Filtro de Data
+        let matchesDate = true;
+        if (dateStart && msg.date < dateStart) matchesDate = false;
+        if (dateEnd && msg.date > dateEnd) matchesDate = false;
+
+        return matchesText && matchesDate;
+      });
+
+      filtered.forEach(msg => {
+        const item = document.createElement('div');
+        item.className = `msg-bubble ${getAuthorClass(msg.author)}`;
+        
+        let displayContent = msg.content;
+        if (searchTerm && searchTerm !== 'te amo') {
+          const searchRegex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+          displayContent = displayContent.replace(searchRegex, `<span class="highlight">$1</span>`);
+        } else if (searchTerm === 'te amo') {
+          displayContent = displayContent.replace(masterLoveRegex, match => `<span class="highlight">${match}</span>`);
+        }
+
+        item.innerHTML = `
+          <div class="msg-header">
+            <span>${msg.author}</span>
+            <span>${msg.dateRaw} ${msg.time}</span>
+          </div>
+          <div>${displayContent}</div>
+        `;
+        chatFeed.appendChild(item);
+      });
+    }
+
+    function getAuthorClass(author) {
+      const name = author.toLowerCase();
+      if (name.includes('fabricio') || name.includes('fabrício')) {
+        return 'msg-fabricio';
+      } else if (name.includes('maria')) {
+        return 'msg-maria';
+      }
+      return 'msg-other';
+    }
+
+    // Handlers de Eventos dos Filtros
+    document.getElementById('searchInput').addEventListener('input', filterAndRenderChat);
+    document.getElementById('dateStart').addEventListener('change', filterAndRenderChat);
+    document.getElementById('dateEnd').addEventListener('change', filterAndRenderChat);
+
+    function applyTag(tag) {
+      document.getElementById('searchInput').value = tag;
+      filterAndRenderChat();
+    }
+
+    function clearFilters() {
+      document.getElementById('searchInput').value = "";
+      document.getElementById('dateStart').value = "";
+      document.getElementById('dateEnd').value = "";
+      filterAndRenderChat();
+    }
   </script>
 
 </body>
