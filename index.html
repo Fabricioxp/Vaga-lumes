@@ -91,18 +91,34 @@
       text-shadow: 0 1px 2px rgba(0,0,0,0.6);
     }
 
-    .counter-section {
-      text-align: center;
-      background: linear-gradient(135deg, rgba(230, 179, 168, 0.25), rgba(140, 98, 93, 0.1));
-      border: 1px solid var(--border-color);
-      padding: 20px;
-      border-radius: 16px;
+    /* GRID DE CONTADORES E ESTATÍSTICAS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
       margin-bottom: 20px;
       display: none;
     }
-    .counter-title { font-size: 0.85rem; color: var(--secondary); text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
-    .counter-number { font-size: 2.8rem; font-weight: 800; color: var(--primary); margin: 5px 0; }
-    .last-updated { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; font-style: italic; }
+    .stat-card {
+      background: linear-gradient(135deg, rgba(230, 179, 168, 0.2), rgba(140, 98, 93, 0.05));
+      border: 1px solid var(--border-color);
+      padding: 16px;
+      border-radius: 16px;
+      text-align: center;
+    }
+    .stat-card.fabricio {
+      background: rgba(74, 21, 75, 0.08);
+      border-color: rgba(107, 33, 168, 0.3);
+    }
+    .stat-card.maria {
+      background: rgba(30, 41, 59, 0.08);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+    .stat-title { font-size: 0.75rem; color: var(--secondary); text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold; }
+    .stat-number { font-size: 1.8rem; font-weight: 800; color: var(--primary); margin: 4px 0; }
+    .stat-card.fabricio .stat-number { color: #4a154b; }
+    .stat-card.maria .stat-number { color: #1e293b; }
+    .last-updated { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; font-style: italic; text-align: center; grid-column: 1 / -1; }
     
     .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .section-title { font-size: 0.95rem; font-weight: bold; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -137,6 +153,18 @@
     .date-row { display: flex; gap: 10px; align-items: center; font-size: 0.85rem; color: var(--secondary); flex-wrap: wrap; }
     .date-row input { background: #ffffff; border: 1px solid var(--border-color); color: var(--text-color); padding: 6px 10px; border-radius: 8px; }
     
+    .search-counter-badge {
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: bold;
+      padding: 6px 12px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+    }
+
     .tags-container { position: relative; }
     .tag-menu-btn { background: #ffffff; border: 1px solid var(--border-color); color: var(--primary); padding: 10px 14px; border-radius: 10px; font-size: 0.85rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
     .tag-menu-btn:hover { background: var(--primary); color: #fff; }
@@ -190,9 +218,24 @@
         <div id="progressText" class="progress-text">0%</div>
       </div>
 
-      <div id="counterSection" class="counter-section">
-        <div class="counter-title">Vezes Aproximadas que dissemos "Te Amo" ❤️</div>
-        <div id="counterNumber" class="counter-number">0</div>
+      <!-- ESTATÍSTICAS DE MENSAGENS -->
+      <div id="statsGrid" class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-title">Declarações "Te Amo" ❤️</div>
+          <div id="counterNumber" class="stat-number">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Total de Mensagens 💬</div>
+          <div id="totalMessages" class="stat-number">0</div>
+        </div>
+        <div class="stat-card fabricio">
+          <div class="stat-title">Fabricio 💜</div>
+          <div id="fabricioMessages" class="stat-number">0</div>
+        </div>
+        <div class="stat-card maria">
+          <div class="stat-title">Meu Amor 💙</div>
+          <div id="mariaMessages" class="stat-number">0</div>
+        </div>
         <div id="lastUpdated" class="last-updated"></div>
       </div>
 
@@ -215,6 +258,10 @@
             <div class="input-wrapper">
               <span class="search-icon">🔍</span>
               <input type="text" id="searchInput" placeholder="Pesquisar termo no chat...">
+            </div>
+
+            <div id="searchCounter" class="search-counter-badge" style="display:none;">
+              0 resultados
             </div>
 
             <div class="tags-container">
@@ -258,7 +305,6 @@
     const patternAMO = /a+m+o+/.source;
     const patternVOCE = /(?:v+o*c+[eê]*|v+c+)/.source;
 
-    // \b garante limites de palavra (impede "amor", "amora", "tamo", "entendeu", etc.)
     const patternTE_AMO = new RegExp(`\\b(?:${patternEU})?${patternTE_TI}[\\s,]+${patternAMO}\\b`, 'gi');
     const patternAMO_VOCE = new RegExp(`\\b${patternAMO}[\\s,]+(?:${patternEU})?${patternVOCE}\\b`, 'gi');
 
@@ -373,9 +419,19 @@
 
     function renderDashboard() {
       let loveCount = 0; 
+      let fabricioCount = 0;
+      let mariaCount = 0;
       const loveMessages = [];
 
       parsedMessages.forEach(msg => {
+        // Estatísticas do autor
+        if (isFabricio(msg.author)) {
+          fabricioCount++;
+        } else {
+          mariaCount++;
+        }
+
+        // Contagem de "Te Amo"
         const matches = msg.content.match(masterLoveRegex);
         if (matches) { 
           loveCount += matches.length; 
@@ -384,7 +440,10 @@
       });
 
       document.getElementById('counterNumber').innerText = loveCount;
-      document.getElementById('counterSection').style.display = 'block';
+      document.getElementById('totalMessages').innerText = parsedMessages.length;
+      document.getElementById('fabricioMessages').innerText = fabricioCount;
+      document.getElementById('mariaMessages').innerText = mariaCount;
+      document.getElementById('statsGrid').style.display = 'grid';
 
       const highlightsList = document.getElementById('highlightsList');
       highlightsList.innerHTML = "";
@@ -404,20 +463,48 @@
     }
 
     function applyFilters() {
-      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
       const dateStart = document.getElementById('dateStart').value;
       const dateEnd = document.getElementById('dateEnd').value;
+      const searchCounterEl = document.getElementById('searchCounter');
+
+      let termOccurrenceCount = 0;
 
       filteredMessages = parsedMessages.filter(msg => {
         let matchesText = true;
+        let countInMsg = 0;
+
         if (searchTerm) { 
-          matchesText = (searchTerm === 'te amo') ? masterLoveRegex.test(msg.content) : msg.content.toLowerCase().includes(searchTerm); 
+          if (searchTerm === 'te amo') {
+            const matches = msg.content.match(masterLoveRegex);
+            matchesText = !!matches;
+            if (matches) countInMsg = matches.length;
+          } else {
+            const regex = new RegExp(escapeRegExp(searchTerm), 'gi');
+            const matches = msg.content.match(regex);
+            matchesText = !!matches;
+            if (matches) countInMsg = matches.length;
+          }
         }
+
         let matchesDate = true;
         if (dateStart && msg.date < dateStart) matchesDate = false;
         if (dateEnd && msg.date > dateEnd) matchesDate = false;
-        return matchesText && matchesDate;
+
+        if (matchesText && matchesDate) {
+          termOccurrenceCount += (searchTerm ? countInMsg : 1);
+          return true;
+        }
+        return false;
       });
+
+      // Atualiza badge com a contagem da busca
+      if (searchTerm || dateStart || dateEnd) {
+        searchCounterEl.style.display = 'flex';
+        searchCounterEl.innerText = `${termOccurrenceCount} ${termOccurrenceCount === 1 ? 'encontrado' : 'encontrados'}`;
+      } else {
+        searchCounterEl.style.display = 'none';
+      }
 
       currentPage = 1;
       document.getElementById('chatFeed').innerHTML = "";
@@ -426,7 +513,7 @@
 
     function renderPage() {
       const chatFeed = document.getElementById('chatFeed');
-      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
 
       const start = (currentPage - 1) * PAGE_SIZE;
       const end = currentPage * PAGE_SIZE;
@@ -466,10 +553,13 @@
     function applyTag(tag) { document.getElementById('searchInput').value = tag; document.getElementById('tagsPopover').classList.remove('active'); applyFilters(); }
     function clearFilters() { document.getElementById('searchInput').value = ""; document.getElementById('dateStart').value = ""; document.getElementById('dateEnd').value = ""; applyFilters(); }
 
-    function getAuthorClass(author) {
+    function isFabricio(author) {
       const name = author.toLowerCase();
-      if (name.includes('fabricio') || name.includes('fabrício')) return 'msg-fabricio';
-      return 'msg-maria';
+      return name.includes('fabricio') || name.includes('fabrício');
+    }
+
+    function getAuthorClass(author) {
+      return isFabricio(author) ? 'msg-fabricio' : 'msg-maria';
     }
 
     function escapeHTML(str) { return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&#34;' }[tag] || tag)); }
