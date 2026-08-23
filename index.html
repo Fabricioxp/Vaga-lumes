@@ -252,8 +252,16 @@
     let currentPage = 1;
     const PAGE_SIZE = 100;
 
-    const patternTE_AMO = /\b(?:e+u+[\s,]*)?t+e+[\s,]+a+m+o+\b/gi;
-    const patternAMO_VOCE = /\ba+m+o+[\s,]+(?:v+o+c+e+|v+c+)\b/gi;
+    // --- REGEX PRECISA PARA DECLARAÇÕES DE AMOR ---
+    const patternEU = /(?:e+u+[\s,]*)/.source;
+    const patternTE_TI = /[tt]+[ei]+/.source;
+    const patternAMO = /a+m+o+/.source;
+    const patternVOCE = /(?:v+o*c+[eê]*|v+c+)/.source;
+
+    // \b garante limites de palavra (impede "amor", "amora", "tamo", "entendeu", etc.)
+    const patternTE_AMO = new RegExp(`\\b(?:${patternEU})?${patternTE_TI}[\\s,]+${patternAMO}\\b`, 'gi');
+    const patternAMO_VOCE = new RegExp(`\\b${patternAMO}[\\s,]+(?:${patternEU})?${patternVOCE}\\b`, 'gi');
+
     const masterLoveRegex = new RegExp(`${patternTE_AMO.source}|${patternAMO_VOCE.source}`, 'gi');
 
     const statusEl = document.getElementById('status');
@@ -364,11 +372,15 @@
     }
 
     function renderDashboard() {
-      let loveCount = 0; const loveMessages = [];
+      let loveCount = 0; 
+      const loveMessages = [];
 
       parsedMessages.forEach(msg => {
         const matches = msg.content.match(masterLoveRegex);
-        if (matches) { loveCount += matches.length; loveMessages.push(msg); }
+        if (matches) { 
+          loveCount += matches.length; 
+          loveMessages.push(msg); 
+        }
       });
 
       document.getElementById('counterNumber').innerText = loveCount;
@@ -398,7 +410,9 @@
 
       filteredMessages = parsedMessages.filter(msg => {
         let matchesText = true;
-        if (searchTerm) { matchesText = (searchTerm === 'te amo') ? masterLoveRegex.test(msg.content) : msg.content.toLowerCase().includes(searchTerm); }
+        if (searchTerm) { 
+          matchesText = (searchTerm === 'te amo') ? masterLoveRegex.test(msg.content) : msg.content.toLowerCase().includes(searchTerm); 
+        }
         let matchesDate = true;
         if (dateStart && msg.date < dateStart) matchesDate = false;
         if (dateEnd && msg.date > dateEnd) matchesDate = false;
