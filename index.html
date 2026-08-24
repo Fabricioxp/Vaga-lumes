@@ -161,17 +161,33 @@
     .highlight { background-color: #fef08a; color: #854d0e; font-weight: bold; padding: 1px 3px; border-radius: 3px; }
     .load-more-btn { background: var(--primary); color: #ffffff; border: none; padding: 8px 14px; border-radius: 12px; cursor: pointer; margin: 8px 0; font-size: 0.8rem; font-weight: bold; align-self: center; }
 
-    /* CARD EXPORTÁVEL (WRAPPED) */
+    /* ESTILOS E FORMATOS DO WRAPPED */
+    .wrap-story { width: 340px; min-height: 600px; }
+    .wrap-square { width: 420px; min-height: 420px; }
+    .wrap-landscape { width: 550px; min-height: 310px; }
+
+    .theme-romantic { background: linear-gradient(135deg, #4a154b, #1e293b); color: #ffffff; }
+    .theme-dark { background: linear-gradient(135deg, #0f172a, #020617); color: #f8fafc; }
+    .theme-neon { background: linear-gradient(135deg, #2e1065, #3b0764); color: #38bdf8; }
+    .theme-gold { background: linear-gradient(135deg, #451a03, #78350f); color: #fef08a; }
+
     #exportCard {
-      display: none; background: linear-gradient(135deg, #4a154b, #1e293b); color: #ffffff;
-      padding: 24px; border-radius: 20px; text-align: center; margin-top: 16px;
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
+      margin: 0 auto;
     }
-    #exportCard h2 { font-size: 1.4rem; margin-bottom: 6px; color: #fb7185; }
-    #exportCard p { font-size: 0.85rem; opacity: 0.9; }
+    #exportCard h2 { font-size: 1.3rem; margin-bottom: 4px; }
+    #exportCard p { font-size: 0.8rem; opacity: 0.9; }
     .wrapped-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 16px 0; }
-    .wrapped-item { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 12px; font-size: 0.8rem; }
-    .wrapped-val { font-size: 1.2rem; font-weight: bold; color: #38bdf8; display: block; }
-    
+    .wrapped-item { background: rgba(255,255,255,0.12); padding: 10px; border-radius: 12px; font-size: 0.75rem; text-align: center; }
+    .wrapped-val { font-size: 1.1rem; font-weight: bold; display: block; margin-top: 4px; word-break: break-word; }
+
     .media-img { max-width: 100%; max-height: 200px; border-radius: 8px; margin-top: 6px; display: block; }
     audio { width: 100%; height: 36px; margin-top: 6px; }
 
@@ -181,13 +197,24 @@
       margin: 0 !important; display: flex !important; flex-direction: column; gap: 12px;
     }
     .fullscreen-mode .chat-feed { max-height: none !important; height: 100% !important; flex: 1; }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .tabs-nav, .file-dropzone, .btn, .chat-controls { display: none !important; }
+      .tab-content { display: block !important; page-break-after: always; }
+      .card { box-shadow: none; border: 1px solid #ccc; }
+    }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <!-- CARREGADOR DE ARQUIVO -->
+    <!-- CARREGADOR DE ARQUIVO E PRIVACIDADE -->
     <div class="card">
+      <div style="background: rgba(140, 98, 93, 0.08); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 10px; font-size: 0.75rem; text-align: center; margin-bottom: 12px;">
+        🔒 <b>Privacidade Garantida:</b> Suas conversas e mídias são processadas 100% localmente no seu navegador. Nenhum dado é enviado para servidores.
+      </div>
+
       <div class="file-dropzone" id="dropzoneBox">
         <span id="dropzoneText">📁 Selecione a conversa do WhatsApp (.txt ou .zip com mídias)</span>
         <input type="file" id="fileInput" accept=".txt,.zip">
@@ -231,7 +258,8 @@
       <button class="tab-btn" onclick="switchTab('memoriesTab')">✨ Recordações & Curiosidades</button>
       <button class="tab-btn" onclick="switchTab('quizTab')">🎮 Quiz do Casal</button>
       <button class="tab-btn" onclick="switchTab('chatTab')">💬 Histórico & Busca</button>
-      <button class="tab-btn" onclick="exportWrappedCard()">🎁 Gerar Card (Wrapped)</button>
+      <button class="tab-btn" onclick="switchTab('wrappedTab')">🎨 Gerar Card (Wrapped)</button>
+      <button class="tab-btn" onclick="exportPDFReport()" style="margin-left: auto;">🖨️ PDF</button>
     </div>
 
     <!-- ABA 1: ANÁLISES & GRÁFICOS -->
@@ -328,29 +356,53 @@
       </div>
     </div>
 
-    <!-- CARD ESTÉTICO PARA EXPORTAÇÃO (SPOTIFY WRAPPED) -->
-    <div id="exportCard">
-      <h2>Nosso Histórico de Amor ❤️</h2>
-      <p id="wrappedDateRange">Estatísticas do nosso relacionamento</p>
-      <div class="wrapped-grid">
-        <div class="wrapped-item">
-          <span>Total de Mensagens</span>
-          <span class="wrapped-val" id="wrapTotal">0</span>
+    <!-- ABA 5: GERADOR DE WRAPPED (CARD PERSONALIZÁVEL) -->
+    <div id="wrappedTab" class="tab-content">
+      <div class="card">
+        <div class="section-title" style="margin-bottom: 12px;">🎨 Personalizar Card (Wrapped)</div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 16px;">
+          <label style="font-size: 0.8rem; font-weight: bold;">Formato:
+            <select id="wrapFormat" onchange="updateWrappedPreview()" style="width:100%; padding: 6px; border-radius: 8px; border: 1px solid var(--border-color); margin-top:4px;">
+              <option value="story">📱 Instagram Stories (9:16)</option>
+              <option value="square">🔲 Quadrado Feed (1:1)</option>
+              <option value="landscape">💻 Banner Retangular (16:9)</option>
+            </select>
+          </label>
+
+          <label style="font-size: 0.8rem; font-weight: bold;">Estilo Visual:
+            <select id="wrapTheme" onchange="updateWrappedPreview()" style="width:100%; padding: 6px; border-radius: 8px; border: 1px solid var(--border-color); margin-top:4px;">
+              <option value="romantic">💖 Romântico Pastel</option>
+              <option value="dark">🌙 Dark Midnight</option>
+              <option value="neon">⚡ Neon Cyberpunk</option>
+              <option value="gold">✨ Elegante Dourado</option>
+            </select>
+          </label>
+
+          <label style="font-size: 0.8rem; font-weight: bold;">Conteúdo em Destaque:
+            <select id="wrapContentType" onchange="updateWrappedPreview()" style="width:100%; padding: 6px; border-radius: 8px; border: 1px solid var(--border-color); margin-top:4px;">
+              <option value="general">📊 Visão Geral do Casal</option>
+              <option value="love">❤️ Foco no Amor & Carinho</option>
+              <option value="fun">🤡 Curiosidades Engraçadas</option>
+            </select>
+          </label>
         </div>
-        <div class="wrapped-item">
-          <span>"Te Amo" Trocados</span>
-          <span class="wrapped-val" id="wrapLove">0</span>
-        </div>
-        <div class="wrapped-item">
-          <span>Dia mais Ativo</span>
-          <span class="wrapped-val" id="wrapTopDay" style="font-size: 0.8rem;">-</span>
-        </div>
-        <div class="wrapped-item">
-          <span>Mago do Bom Dia</span>
-          <span class="wrapped-val" id="wrapBomDia" style="font-size: 0.85rem;">-</span>
+
+        <button class="btn btn-primary" onclick="downloadWrappedImage()" style="margin: 0 auto 16px auto;">📥 Baixar Imagem do Card</button>
+
+        <div id="exportCardWrapper" style="display: flex; justify-content: center; overflow-x: auto; padding: 10px 0;">
+          <div id="exportCard" class="wrap-story theme-romantic">
+            <div>
+              <h2 id="wrapTitle">Nosso Histórico de Amor ❤️</h2>
+              <p id="wrapSubtitle">Estatísticas do nosso relacionamento</p>
+            </div>
+            
+            <div class="wrapped-grid" id="wrappedGrid"></div>
+            
+            <p style="font-size: 0.7rem; opacity: 0.7; margin-top: 10px;">Gerado com o Nosso Histórico do WhatsApp 🥰</p>
+          </div>
         </div>
       </div>
-      <p style="font-size: 0.75rem; opacity: 0.7;">Gerado exclusivamente com o nosso histórico do WhatsApp 🥰</p>
     </div>
 
   </div>
@@ -407,9 +459,13 @@
       document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
       
-      const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+      const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes(tabId));
       if (btn) btn.classList.add('active');
+
+      if (tabId === 'wrappedTab') updateWrappedPreview();
     }
+
+    function exportPDFReport() { window.print(); }
 
     document.getElementById('fileInput').addEventListener('change', async function(e) {
       const file = e.target.files[0];
@@ -436,7 +492,6 @@
 
           rawText = await zipContent.files[txtFileName].async('string');
 
-          // Mapear midias se existirem
           const totalFiles = Object.keys(zipContent.files).length;
           let loaded = 0;
           for (let fileName in zipContent.files) {
@@ -495,7 +550,6 @@
             isoDate = `${year}-${month}-${day}`;
           }
 
-          // Extrai hora numerica
           let hour = 0;
           const timeMatch = match[2].match(/(\d{1,2}):(\d{2})/);
           if (timeMatch) hour = parseInt(timeMatch[1], 10);
@@ -544,15 +598,13 @@
       applyFilters();
     }
 
-    /* GENERADOR DE GRÁFICOS (CHART.JS) */
     function generateCharts() {
-      // 1. Evolução Mensal
       const monthlyData = {};
       const hoursData = Array(24).fill(0);
 
       parsedMessages.forEach(msg => {
         if (msg.date) {
-          const monthKey = msg.date.substring(0, 7); // YYYY-MM
+          const monthKey = msg.date.substring(0, 7);
           if (!monthlyData[monthKey]) monthlyData[monthKey] = { fabricio: 0, maria: 0 };
           if (isFabricio(msg.author)) monthlyData[monthKey].fabricio++;
           else monthlyData[monthKey].maria++;
@@ -590,7 +642,6 @@
       });
     }
 
-    /* RECORDAÇÕES & CURIOSIDADES */
     function generateMemoriesAndRecords() {
       const today = new Date();
       const monthDay = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -610,24 +661,20 @@
         });
       }
 
-      // Recordes
       const dateCounts = {};
       let bomDiaFab = 0, bomDiaMar = 0;
       const wordFreq = {};
       const emojiFreqFab = {}, emojiFreqMar = {};
       const emojiRegex = /(\p{Emoji_Presentation}|\p{Extended_Pictographic})/gu;
 
-      parsedMessages.forEach((m, idx) => {
-        // Dia com mais mensagens
+      parsedMessages.forEach((m) => {
         dateCounts[m.dateRaw] = (dateCounts[m.dateRaw] || 0) + 1;
 
-        // Bom dia
         if (/bom\s*dia/i.test(m.content)) {
           if (isFabricio(m.author)) bomDiaFab++;
           else bomDiaMar++;
         }
 
-        // Palavras frequentes (limpando conectivos)
         const words = m.content.toLowerCase().split(/\s+/);
         words.forEach(w => {
           const clean = w.replace(/[^\wáàâãéèêíóôõúç]/gi, '');
@@ -636,7 +683,6 @@
           }
         });
 
-        // Emojis
         const emojis = m.content.match(emojiRegex);
         if (emojis) {
           emojis.forEach(e => {
@@ -658,12 +704,10 @@
         <div>🏆 <b>Campeão do "Bom dia":</b> ${bomDiaFab > bomDiaMar ? 'Fabricio 💜' : 'Meu Amor 💙'}</div>
       `;
 
-      // Nuvem de Palavras Top 15
       const sortedWords = Object.entries(wordFreq).sort((a,b) => b[1] - a[1]).slice(0, 15);
       const cloudBox = document.getElementById('wordCloudBox');
       cloudBox.innerHTML = sortedWords.map(([w, c]) => `<span class="word-chip">${w} <span class="word-count">${c}</span></span>`).join('');
 
-      // Top Emojis
       const topEmojiFab = Object.entries(emojiFreqFab).sort((a,b) => b[1] - a[1]).slice(0, 5);
       const topEmojiMar = Object.entries(emojiFreqMar).sort((a,b) => b[1] - a[1]).slice(0, 5);
 
@@ -680,7 +724,7 @@
       `;
     }
 
-    /* QUIZ AUTOMÁTICO */
+    /* MOTOR DE QUIZ EXTENSÍVEL COM DEZENAS DE VARIAÇÕES */
     function generateQuizQuestion() {
       if (parsedMessages.length === 0) return;
 
@@ -688,57 +732,122 @@
       const optBox = document.getElementById('quizOptions');
       optBox.innerHTML = "";
 
-      const types = ['love', 'bomdia', 'total'];
-      const chosen = types[Math.floor(Math.random() * types.length)];
+      const quizTypes = [
+        'top_love', 'top_bomdia', 'top_boanoite', 'night_owl', 
+        'total_approx', 'audio_king', 'saudade_king', 'laugh_king',
+        'busy_hour', 'longest_msg'
+      ];
 
-      if (chosen === 'love') {
+      const chosen = quizTypes[Math.floor(Math.random() * quizTypes.length)];
+
+      let questionText = "";
+      let correctAnswer = "";
+      let options = [];
+
+      if (chosen === 'top_love') {
         let fab = 0, mar = 0;
         parsedMessages.forEach(m => {
           const match = m.content.match(masterLoveRegex);
-          if (match) {
-            if (isFabricio(m.author)) fab += match.length;
-            else mar += match.length;
-          }
+          if (match) { if (isFabricio(m.author)) fab += match.length; else mar += match.length; }
         });
-        const correct = fab > mar ? "Fabricio 💜" : "Meu Amor 💙";
-        
-        qBox.innerText = "Quem disse 'Te Amo' mais vezes na história do chat?";
-        quizCurrentQuestion = correct;
-
-        createQuizButton("Fabricio 💜");
-        createQuizButton("Meu Amor 💙");
-      } else if (chosen === 'bomdia') {
+        questionText = "Quem disse mais vezes 'Te Amo' na história do chat?";
+        correctAnswer = fab >= mar ? "Fabricio 💜" : "Meu Amor 💙";
+        options = ["Fabricio 💜", "Meu Amor 💙"];
+      }
+      else if (chosen === 'top_bomdia') {
         let fab = 0, mar = 0;
         parsedMessages.forEach(m => {
-          if (/bom\s*dia/i.test(m.content)) {
-            if (isFabricio(m.author)) fab++; else mar++;
+          if (/bom\s*dia/i.test(m.content)) { if (isFabricio(m.author)) fab++; else mar++; }
+        });
+        questionText = "Quem manda mais 'Bom Dia' no dia a dia?";
+        correctAnswer = fab >= mar ? "Fabricio 💜" : "Meu Amor 💙";
+        options = ["Fabricio 💜", "Meu Amor 💙"];
+      }
+      else if (chosen === 'top_boanoite') {
+        let fab = 0, mar = 0;
+        parsedMessages.forEach(m => {
+          if (/boa\s*noite/i.test(m.content)) { if (isFabricio(m.author)) fab++; else mar++; }
+        });
+        questionText = "Quem é o campeão do 'Boa Noite'?";
+        correctAnswer = fab >= mar ? "Fabricio 💜" : "Meu Amor 💙";
+        options = ["Fabricio 💜", "Meu Amor 💙"];
+      }
+      else if (chosen === 'night_owl') {
+        questionText = "Quem envia mais mensagens de madrugada (00h às 05h)?";
+        correctAnswer = getNightOwl();
+        options = ["Fabricio 💜", "Meu Amor 💙"];
+      }
+      else if (chosen === 'total_approx') {
+        const total = parsedMessages.length;
+        questionText = "Aproximadamente, quantas mensagens no total já trocamos?";
+        correctAnswer = `${total}`;
+        options = [
+          `${total}`,
+          `${Math.round(total * 0.6)}`,
+          `${Math.round(total * 1.4)}`,
+          `${Math.round(total * 1.8)}`
+        ].sort(() => Math.random() - 0.5);
+      }
+      else if (chosen === 'audio_king') {
+        questionText = "Quem é o campeão dos áudios na conversa?";
+        correctAnswer = getAudioKing();
+        options = ["Fabricio 💜", "Meu Amor 💙"];
+      }
+      else if (chosen === 'saudade_king') {
+        let fab = 0, mar = 0;
+        parsedMessages.forEach(m => {
+          if (/saudade/i.test(m.content)) { if (isFabricio(m.author)) fab++; else mar++; }
+        });
+        questionText = "Quem fala mais 'Saudade' no chat?";
+        correctAnswer = fab >= mar ? "Fabricio 💜" : "Meu Amor 💙";
+        options = ["Fabricio 💜", "Meu Amor 💙"];
+      }
+      else if (chosen === 'laugh_king') {
+        let fab = 0, mar = 0;
+        parsedMessages.forEach(m => {
+          if (/(kkk|hahah|rsrs|hehe)/i.test(m.content)) { if (isFabricio(m.author)) fab++; else mar++; }
+        });
+        questionText = "Quem rri mais por texto (kkk, hahaha, etc)?";
+        correctAnswer = fab >= mar ? "Fabricio 💜" : "Meu Amor 💙";
+        options = ["Fabricio 💜", "Meu Amor 💙"];
+      }
+      else if (chosen === 'busy_hour') {
+        const hours = Array(24).fill(0);
+        parsedMessages.forEach(m => { if (m.hour >= 0 && m.hour < 24) hours[m.hour]++; });
+        const peakHour = hours.indexOf(Math.max(...hours));
+        
+        questionText = "Qual é o horário em que mais conversamos no dia?";
+        correctAnswer = `${peakHour}h às ${peakHour + 1}h`;
+        options = [
+          `${peakHour}h às ${peakHour + 1}h`,
+          `${(peakHour + 4) % 24}h às ${(peakHour + 5) % 24}h`,
+          `${(peakHour + 8) % 24}h às ${(peakHour + 9) % 24}h`,
+          `${(peakHour + 12) % 24}h às ${(peakHour + 13) % 24}h`
+        ].sort(() => Math.random() - 0.5);
+      }
+      else if (chosen === 'longest_msg') {
+        let maxLen = 0, author = "";
+        parsedMessages.forEach(m => {
+          if (m.content.length > maxLen) {
+            maxLen = m.content.length;
+            author = isFabricio(m.author) ? "Fabricio 💜" : "Meu Amor 💙";
           }
         });
-        const correct = fab > mar ? "Fabricio 💜" : "Meu Amor 💙";
-
-        qBox.innerText = "Quem manda mais 'Bom dia' no dia a dia?";
-        quizCurrentQuestion = correct;
-
-        createQuizButton("Fabricio 💜");
-        createQuizButton("Meu Amor 💙");
-      } else {
-        const total = parsedMessages.length;
-        qBox.innerText = `Aproximadamente quantas mensagens já trocamos?`;
-        quizCurrentQuestion = `${total}`;
-
-        createQuizButton(`${total}`);
-        createQuizButton(`${Math.round(total * 0.7)}`);
-        createQuizButton(`${Math.round(total * 1.3)}`);
-        createQuizButton(`${Math.round(total * 1.5)}`);
+        questionText = "Quem enviou a MAIOR mensagem (o maior 'textão')?";
+        correctAnswer = author;
+        options = ["Fabricio 💜", "Meu Amor 💙"];
       }
-    }
 
-    function createQuizButton(text) {
-      const btn = document.createElement('button');
-      btn.className = 'quiz-btn';
-      btn.innerText = text;
-      btn.onclick = () => checkQuizAnswer(text);
-      document.getElementById('quizOptions').appendChild(btn);
+      qBox.innerText = questionText;
+      quizCurrentQuestion = correctAnswer;
+
+      options.forEach(optText => {
+        const btn = document.createElement('button');
+        btn.className = 'quiz-btn';
+        btn.innerText = optText;
+        btn.onclick = () => checkQuizAnswer(optText);
+        optBox.appendChild(btn);
+      });
     }
 
     function checkQuizAnswer(selected) {
@@ -750,6 +859,92 @@
       }
       document.getElementById('quizScore').innerText = `Pontuação: ${quizScorePoints}`;
       generateQuizQuestion();
+    }
+
+    /* WRAPPED DINÂMICO (FORMATOS, ESTILOS E CONTEÚDOS) */
+    function updateWrappedPreview() {
+      const format = document.getElementById('wrapFormat').value;
+      const theme = document.getElementById('wrapTheme').value;
+      const contentType = document.getElementById('wrapContentType').value;
+      const card = document.getElementById('exportCard');
+      const grid = document.getElementById('wrappedGrid');
+
+      card.className = `wrap-${format} theme-${theme}`;
+
+      let total = parsedMessages.length;
+      let loveCount = document.getElementById('counterNumber').innerText;
+      
+      let fabMsgs = 0, marMsgs = 0;
+      let bomDiaFab = 0, bomDiaMar = 0;
+      let boaNoiteFab = 0, boaNoiteMar = 0;
+      let saudadesCount = 0;
+
+      parsedMessages.forEach(m => {
+        if (isFabricio(m.author)) fabMsgs++; else marMsgs++;
+        if (/bom\s*dia/i.test(m.content)) { if (isFabricio(m.author)) bomDiaFab++; else bomDiaMar++; }
+        if (/boa\s*noite/i.test(m.content)) { if (isFabricio(m.author)) boaNoiteFab++; else boaNoiteMar++; }
+        if (/saudade/i.test(m.content)) saudadesCount++;
+      });
+
+      let itemsHTML = "";
+
+      if (contentType === 'general') {
+        document.getElementById('wrapTitle').innerText = "Nosso Ano em Mensagens 💬";
+        itemsHTML = `
+          <div class="wrapped-item"><span>Total de Mensagens</span><span class="wrapped-val">${total}</span></div>
+          <div class="wrapped-item"><span>"Te Amo" Trocados</span><span class="wrapped-val">${loveCount}</span></div>
+          <div class="wrapped-item"><span>Mais Tagarela</span><span class="wrapped-val">${fabMsgs > marMsgs ? 'Fabricio 💜' : 'Meu Amor 💙'}</span></div>
+          <div class="wrapped-item"><span>Mago do Bom Dia</span><span class="wrapped-val">${bomDiaFab > bomDiaMar ? 'Fabricio 💜' : 'Meu Amor 💙'}</span></div>
+        `;
+      } else if (contentType === 'love') {
+        document.getElementById('wrapTitle').innerText = "Métricas do Nosso Amor ❤️";
+        itemsHTML = `
+          <div class="wrapped-item"><span>Declarações</span><span class="wrapped-val">${loveCount}</span></div>
+          <div class="wrapped-item"><span>Mensagens de Saudade</span><span class="wrapped-val">${saudadesCount}</span></div>
+          <div class="wrapped-item"><span>Boa Noite Trocados</span><span class="wrapped-val">${boaNoiteFab + boaNoiteMar}x</span></div>
+          <div class="wrapped-item"><span>Resultado</span><span class="wrapped-val">Empate TÉCNICO!</span></div>
+        `;
+      } else if (contentType === 'fun') {
+        document.getElementById('wrapTitle').innerText = "Curiosidades do Chat 🤡";
+        itemsHTML = `
+          <div class="wrapped-item"><span>Coruja da Madrugada</span><span class="wrapped-val">${getNightOwl()}</span></div>
+          <div class="wrapped-item"><span>Mestre dos Áudios</span><span class="wrapped-val">${getAudioKing()}</span></div>
+          <div class="wrapped-item"><span>Acorda Cedo</span><span class="wrapped-val">${bomDiaFab > bomDiaMar ? 'Fabricio 💜' : 'Meu Amor 💙'}</span></div>
+          <div class="wrapped-item"><span>Média Diária</span><span class="wrapped-val">~${Math.round(total / 30)} msgs/dia</span></div>
+        `;
+      }
+
+      grid.innerHTML = itemsHTML;
+    }
+
+    function getNightOwl() {
+      let fabNight = 0, marNight = 0;
+      parsedMessages.forEach(m => {
+        if (m.hour >= 0 && m.hour <= 5) {
+          if (isFabricio(m.author)) fabNight++; else marNight++;
+        }
+      });
+      return fabNight >= marNight ? 'Fabricio 💜' : 'Meu Amor 💙';
+    }
+
+    function getAudioKing() {
+      let fabAudio = 0, marAudio = 0;
+      parsedMessages.forEach(m => {
+        if (/\.(opus|m4a|mp3)/i.test(m.content) || m.content.includes('Áudio omitido')) {
+          if (isFabricio(m.author)) fabAudio++; else marAudio++;
+        }
+      });
+      return fabAudio >= marAudio ? 'Fabricio 💜' : 'Meu Amor 💙';
+    }
+
+    function downloadWrappedImage() {
+      const card = document.getElementById('exportCard');
+      html2canvas(card, { scale: 2 }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'nosso-wrapped.png';
+        link.href = canvas.toDataURL();
+        link.click();
+      });
     }
 
     /* FILTROS E PESQUISA NO CHAT */
@@ -823,7 +1018,6 @@
           displayContent = displayContent.replace(activeRegex, match => `<span class="highlight">${match}</span>`);
         }
 
-        // Anexo de midias (se zip)
         let mediaHTML = "";
         for (let fileName in mediaFiles) {
           if (msg.content.includes(fileName)) {
@@ -846,29 +1040,6 @@
         btn.onclick = () => { currentPage++; renderPage(); };
         chatFeed.appendChild(btn);
       }
-    }
-
-    /* EXPORTAR CARD ESTÉTICO (WRAPPED) */
-    function exportWrappedCard() {
-      const card = document.getElementById('exportCard');
-      card.style.display = 'block';
-
-      document.getElementById('wrapTotal').innerText = parsedMessages.length;
-      document.getElementById('wrapLove').innerText = document.getElementById('counterNumber').innerText;
-      
-      const recordsText = document.getElementById('recordsContent').innerText;
-      const topDayMatch = recordsText.match(/Dia mais ativo:\s*([^\(]+)/);
-      if (topDayMatch) document.getElementById('wrapTopDay').innerText = topDayMatch[1].trim();
-
-      const bomDiaMatch = recordsText.match(/Campeão do "Bom dia":\s*(.+)/);
-      if (bomDiaMatch) document.getElementById('wrapBomDia').innerText = bomDiaMatch[1].trim();
-
-      html2canvas(card).then(canvas => {
-        const link = document.createElement('a');
-        link.download = 'nosso-historico-de-amor.png';
-        link.href = canvas.toDataURL();
-        link.click();
-      });
     }
 
     function toggleFullscreen(elementId) { document.getElementById(elementId).classList.toggle('fullscreen-mode'); }
