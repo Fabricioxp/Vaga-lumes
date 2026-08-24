@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Nosso Histórico de Amor ❤️</title>
+  <title>Nosso Histórico de Amor ❤️ - Edição Especial</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
       --primary: #8c625d;
@@ -15,21 +17,16 @@
       --text-muted: #8a7573;
       --bg-main: #fff3f2;
       
-      /* Fabricio: Roxo Cósmico */
       --fabricio-bg: #4a154b;
       --fabricio-border: #6b21a8;
       --fabricio-text: #ffffff;
       
-      /* Seu Amor: Azul Escuro Profundo */
       --maria-bg: #1e293b;
       --maria-border: #3b82f6;
       --maria-text: #f8fafc;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
-      width: 100%;
-      overflow-x: hidden;
-    }
+    html, body { width: 100%; overflow-x: hidden; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-color: var(--bg-main);
@@ -41,7 +38,7 @@
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
     }
-    .container { max-width: 800px; width: 100%; }
+    .container { max-width: 900px; width: 100%; }
     .card {
       background-color: var(--bg-card);
       border: 1px solid rgba(230, 179, 168, 0.4);
@@ -49,6 +46,7 @@
       padding: 16px;
       box-shadow: 0 10px 25px rgba(140, 98, 93, 0.12);
       width: 100%;
+      margin-bottom: 16px;
     }
     .file-dropzone {
       border: 2px dashed var(--border-color);
@@ -64,206 +62,238 @@
     }
     .file-dropzone:hover { background: #fdf5f4; border-color: var(--primary); }
     input[type="file"] {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
       opacity: 0; cursor: pointer;
     }
     .status-text { text-align: center; font-weight: bold; color: var(--primary); margin-bottom: 10px; font-size: 0.85rem; min-height: 20px; word-break: break-word; }
     .error-text { color: #d9534f !important; }
     
     .progress-container {
-      width: 100%;
-      background-color: #e2d1cf;
-      border-radius: 12px;
-      overflow: hidden;
-      margin-bottom: 20px;
-      display: none;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
-      position: relative;
-      height: 24px;
+      width: 100%; background-color: #e2d1cf; border-radius: 12px; overflow: hidden;
+      margin-bottom: 20px; display: none; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+      position: relative; height: 24px;
     }
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #a68580, #8c625d);
-      transition: width 0.15s linear;
-      border-radius: 12px;
-    }
-    .progress-text {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.8rem; font-weight: bold; color: #ffffff;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.6);
-    }
+    .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #a68580, #8c625d); transition: width 0.15s linear; border-radius: 12px; }
+    .progress-text { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; color: #ffffff; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
 
-    /* GRID DE CONTADORES RESPONSIVO */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-bottom: 20px;
-      display: none;
-    }
-    @media (max-width: 480px) {
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
-    }
+    /* STATS GRID RESPONSIVO */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; display: none; }
+    @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr; } }
+    
     .stat-card {
       background: linear-gradient(135deg, rgba(230, 179, 168, 0.2), rgba(140, 98, 93, 0.05));
-      border: 1px solid var(--border-color);
-      padding: 12px;
-      border-radius: 16px;
-      text-align: center;
+      border: 1px solid var(--border-color); padding: 12px; border-radius: 16px; text-align: center;
     }
-    .stat-card.fabricio {
-      background: rgba(74, 21, 75, 0.08);
-      border-color: rgba(107, 33, 168, 0.3);
-    }
-    .stat-card.maria {
-      background: rgba(30, 41, 59, 0.08);
-      border-color: rgba(59, 130, 246, 0.3);
-    }
-    .stat-title { font-size: 0.75rem; color: var(--secondary); text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold; }
-    .stat-number { font-size: 1.6rem; font-weight: 800; color: var(--primary); margin: 4px 0; }
+    .stat-card.fabricio { background: rgba(74, 21, 75, 0.08); border-color: rgba(107, 33, 168, 0.3); }
+    .stat-card.maria { background: rgba(30, 41, 59, 0.08); border-color: rgba(59, 130, 246, 0.3); }
+    .stat-title { font-size: 0.72rem; color: var(--secondary); text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold; }
+    .stat-number { font-size: 1.5rem; font-weight: 800; color: var(--primary); margin: 4px 0; word-break: break-word; }
     .stat-card.fabricio .stat-number { color: #4a154b; }
     .stat-card.maria .stat-number { color: #1e293b; }
-    .last-updated { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; font-style: italic; text-align: center; grid-column: 1 / -1; }
-    
+    .stat-desc { font-size: 0.7rem; color: var(--text-muted); }
+
     .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
-    .section-title { font-size: 0.85rem; font-weight: bold; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
-    .btn-fullscreen {
+    .section-title { font-size: 0.9rem; font-weight: bold; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    .btn {
       background: #fff; border: 1px solid var(--border-color); color: var(--primary);
-      padding: 6px 10px; border-radius: 10px; font-size: 0.75rem; cursor: pointer;
+      padding: 6px 12px; border-radius: 10px; font-size: 0.75rem; cursor: pointer;
       display: flex; align-items: center; gap: 4px; font-weight: bold; transition: all 0.2s;
     }
-    .btn-fullscreen:hover { background: var(--primary); color: #fff; }
-    
-    .highlights-box {
-      border: 1px solid rgba(230, 179, 168, 0.5); background: #fffbfb; border-radius: 14px;
-      padding: 12px; margin-bottom: 20px; display: none;
+    .btn:hover { background: var(--primary); color: #fff; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: #734f4b; }
+
+    /* NAVEGAÇÃO DE ABAS */
+    .tabs-nav { display: none; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
+    .tab-btn {
+      padding: 8px 14px; border-radius: 12px; border: 1px solid var(--border-color);
+      background: #ffffff; color: var(--text-color); font-size: 0.8rem; font-weight: bold;
+      cursor: pointer; white-space: nowrap; transition: all 0.2s;
     }
-    .highlights-list { max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px; }
+    .tab-btn.active { background: var(--primary); color: #ffffff; border-color: var(--primary); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* GRÁFICOS */
+    .charts-wrapper { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px; }
+    @media (max-width: 650px) { .charts-wrapper { grid-template-columns: 1fr; } }
+    .chart-box { background: #fffbfb; border: 1px solid var(--border-color); border-radius: 14px; padding: 12px; width: 100%; }
+
+    /* NUVEM DE PALAVRAS & EMOJIS */
+    .cloud-box { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; padding: 10px; }
+    .word-chip { background: #ffffff; border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 8px; font-size: 0.8rem; display: flex; align-items: center; gap: 4px; }
+    .word-count { font-weight: bold; color: var(--primary); font-size: 0.75rem; }
+
+    /* RECORDAÇÃO DO DIA */
+    .memory-card { background: #fffbfb; border: 1px dashed var(--primary); border-radius: 14px; padding: 14px; margin-bottom: 16px; }
+
+    /* QUIZ */
+    .quiz-card { background: #fffbfb; border: 1px solid var(--border-color); border-radius: 14px; padding: 16px; text-align: center; }
+    .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+    @media (max-width: 480px) { .quiz-options { grid-template-columns: 1fr; } }
+    .quiz-btn { background: #fff; border: 1px solid var(--border-color); padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; color: var(--text-color); }
+    .quiz-btn:hover { background: var(--primary); color: #fff; }
+
+    /* FEED E MENSAGENS */
+    .chat-controls { display: flex; flex-direction: column; gap: 10px; background: #fffbfb; padding: 12px; border-radius: 14px; border: 1px solid var(--border-color); margin-bottom: 12px; }
+    .search-row { display: flex; gap: 8px; align-items: center; position: relative; flex-wrap: wrap; }
+    .input-wrapper { position: relative; flex: 1; min-width: 180px; }
+    .input-wrapper input { width: 100%; padding: 10px 12px 10px 34px; border-radius: 12px; border: 1px solid rgba(230, 179, 168, 0.6); background: #ffffff; color: var(--text-color); font-size: 0.85rem; outline: none; }
+    .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); opacity: 0.6; }
+    .date-row { display: flex; gap: 8px; align-items: center; font-size: 0.8rem; color: var(--secondary); flex-wrap: wrap; width: 100%; }
+    .date-row label { display: flex; align-items: center; gap: 4px; flex: 1; min-width: 130px; }
+    .date-row input { width: 100%; background: #ffffff; border: 1px solid var(--border-color); color: var(--text-color); padding: 6px 8px; border-radius: 8px; font-size: 0.8rem; }
     
+    .tags-container { position: relative; }
+    .tags-popover { display: none; position: absolute; top: 110%; right: 0; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 10px; box-shadow: 0 10px 25px rgba(140, 98, 93, 0.18); grid-template-columns: repeat(2, 1fr); gap: 6px; z-index: 1000; width: 240px; max-width: 90vw; }
+    .tags-popover.active { display: grid; }
+    .tag-item { background: #fffbfb; border: 1px solid var(--border-color); color: var(--text-color); padding: 6px 8px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; text-align: left; }
+    .tag-item:hover { background: var(--primary); color: #fff; }
+
+    .chat-feed { height: 450px; overflow-y: auto; padding: 10px; background: #fffbfb; border-radius: 14px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px; }
+    .msg-bubble { max-width: 88%; padding: 10px 12px; border-radius: 14px; font-size: 0.85rem; line-height: 1.4; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; }
+    .msg-fabricio { align-self: flex-end; background-color: var(--fabricio-bg); border: 1px solid var(--fabricio-border); color: var(--fabricio-text); border-bottom-right-radius: 2px; }
+    .msg-maria { align-self: flex-start; background-color: var(--maria-bg); border: 1px solid var(--maria-border); color: var(--maria-text); border-bottom-left-radius: 2px; }
+    .msg-header { font-size: 0.7rem; font-weight: bold; margin-bottom: 4px; display: flex; justify-content: space-between; gap: 8px; opacity: 0.85; }
+    .highlight { background-color: #fef08a; color: #854d0e; font-weight: bold; padding: 1px 3px; border-radius: 3px; }
+    .load-more-btn { background: var(--primary); color: #ffffff; border: none; padding: 8px 14px; border-radius: 12px; cursor: pointer; margin: 8px 0; font-size: 0.8rem; font-weight: bold; align-self: center; }
+
+    /* CARD EXPORTÁVEL (WRAPPED) */
+    #exportCard {
+      display: none; background: linear-gradient(135deg, #4a154b, #1e293b); color: #ffffff;
+      padding: 24px; border-radius: 20px; text-align: center; margin-top: 16px;
+    }
+    #exportCard h2 { font-size: 1.4rem; margin-bottom: 6px; color: #fb7185; }
+    #exportCard p { font-size: 0.85rem; opacity: 0.9; }
+    .wrapped-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 16px 0; }
+    .wrapped-item { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 12px; font-size: 0.8rem; }
+    .wrapped-val { font-size: 1.2rem; font-weight: bold; color: #38bdf8; display: block; }
+    
+    .media-img { max-width: 100%; max-height: 200px; border-radius: 8px; margin-top: 6px; display: block; }
+    audio { width: 100%; height: 36px; margin-top: 6px; }
+
     .fullscreen-mode {
       position: fixed !important; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999;
       background: var(--bg-main) !important; border-radius: 0 !important; padding: 16px !important;
       margin: 0 !important; display: flex !important; flex-direction: column; gap: 12px;
     }
-    .fullscreen-mode .highlights-list, .fullscreen-mode .chat-feed { max-height: none !important; height: 100% !important; flex: 1; }
-    
-    .chat-section { display: none; flex-direction: column; gap: 12px; }
-    .chat-controls { display: flex; flex-direction: column; gap: 10px; background: #fffbfb; padding: 12px; border-radius: 14px; border: 1px solid var(--border-color); }
-    
-    .search-row { display: flex; gap: 8px; align-items: center; position: relative; flex-wrap: wrap; }
-    .input-wrapper { position: relative; flex: 1; min-width: 180px; }
-    .input-wrapper input { width: 100%; padding: 10px 12px 10px 34px; border-radius: 12px; border: 1px solid rgba(230, 179, 168, 0.6); background: #ffffff; color: var(--text-color); font-size: 0.85rem; outline: none; }
-    .input-wrapper input:focus { border-color: var(--primary); }
-    .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); opacity: 0.6; }
-    
-    .date-row { display: flex; gap: 8px; align-items: center; font-size: 0.8rem; color: var(--secondary); flex-wrap: wrap; width: 100%; }
-    .date-row label { display: flex; align-items: center; gap: 4px; flex: 1; min-width: 130px; }
-    .date-row input { width: 100%; background: #ffffff; border: 1px solid var(--border-color); color: var(--text-color); padding: 6px 8px; border-radius: 8px; font-size: 0.8rem; }
-    
-    .search-counter-badge {
-      background: var(--primary);
-      color: #fff;
-      font-size: 0.75rem;
-      font-weight: bold;
-      padding: 6px 10px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      white-space: nowrap;
-    }
-
-    .tags-container { position: relative; }
-    .tag-menu-btn { background: #ffffff; border: 1px solid var(--border-color); color: var(--primary); padding: 8px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
-    .tag-menu-btn:hover { background: var(--primary); color: #fff; }
-    .tags-popover { display: none; position: absolute; top: 110%; right: 0; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 10px; box-shadow: 0 10px 25px rgba(140, 98, 93, 0.18); grid-template-columns: repeat(2, 1fr); gap: 6px; z-index: 1000; width: 240px; max-width: 90vw; }
-    .tags-popover.active { display: grid; }
-    .tag-item { background: #fffbfb; border: 1px solid var(--border-color); color: var(--text-color); padding: 6px 8px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; text-align: left; }
-    .tag-item:hover { background: var(--primary); color: #fff; }
-    
-    .chat-feed { height: 450px; overflow-y: auto; padding: 10px; background: #fffbfb; border-radius: 14px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px; }
-    .msg-bubble { max-width: 88%; padding: 10px 12px; border-radius: 14px; font-size: 0.85rem; line-height: 1.4; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; }
-    
-    /* BALÃO FABRICIO: ROXO CÓSMICO */
-    .msg-fabricio {
-      align-self: flex-end;
-      background-color: var(--fabricio-bg);
-      border: 1px solid var(--fabricio-border);
-      color: var(--fabricio-text);
-      border-bottom-right-radius: 2px;
-    }
-    
-    /* BALÃO SEU AMOR: AZUL ESCURO */
-    .msg-maria {
-      align-self: flex-start;
-      background-color: var(--maria-bg);
-      border: 1px solid var(--maria-border);
-      color: var(--maria-text);
-      border-bottom-left-radius: 2px;
-    }
-    
-    .msg-other { align-self: center; background-color: #f1e4e2; border: 1px solid var(--border-color); font-size: 0.8rem; color: var(--secondary); }
-    .msg-header { font-size: 0.7rem; font-weight: bold; margin-bottom: 4px; display: flex; justify-content: space-between; gap: 8px; opacity: 0.85; }
-    .highlight { background-color: #fef08a; color: #854d0e; font-weight: bold; padding: 1px 3px; border-radius: 3px; }
-    .load-more-btn { background: var(--primary); color: #ffffff; border: none; padding: 8px 14px; border-radius: 12px; cursor: pointer; margin: 8px 0; font-size: 0.8rem; font-weight: bold; align-self: center; transition: background 0.2s; }
-    .load-more-btn:hover { background: #734f4b; }
+    .fullscreen-mode .chat-feed { max-height: none !important; height: 100% !important; flex: 1; }
   </style>
 </head>
 <body>
 
   <div class="container">
+    <!-- CARREGADOR DE ARQUIVO -->
     <div class="card">
       <div class="file-dropzone" id="dropzoneBox">
-        <span id="dropzoneText">📁 Selecione a conversa do WhatsApp (.txt ou .zip)</span>
+        <span id="dropzoneText">📁 Selecione a conversa do WhatsApp (.txt ou .zip com mídias)</span>
         <input type="file" id="fileInput" accept=".txt,.zip">
       </div>
 
       <div id="status" class="status-text"></div>
 
-      <!-- BARRA DE PROGRESSO -->
       <div id="progressContainer" class="progress-container">
         <div id="progressBar" class="progress-bar"></div>
         <div id="progressText" class="progress-text">0%</div>
       </div>
 
-      <!-- ESTATÍSTICAS DE MENSAGENS -->
+      <!-- DASHBOARD DE METRICAS CHAVE -->
       <div id="statsGrid" class="stats-grid">
         <div class="stat-card">
           <div class="stat-title">Declarações "Te Amo" ❤️</div>
           <div id="counterNumber" class="stat-number">0</div>
+          <div class="stat-desc">Contagem rigorosa</div>
         </div>
         <div class="stat-card">
           <div class="stat-title">Total de Mensagens 💬</div>
           <div id="totalMessages" class="stat-number">0</div>
+          <div class="stat-desc">No histórico carregado</div>
         </div>
         <div class="stat-card fabricio">
           <div class="stat-title">Fabricio 💜</div>
           <div id="fabricioMessages" class="stat-number">0</div>
+          <div id="fabricioPercent" class="stat-desc">0% do total</div>
         </div>
         <div class="stat-card maria">
           <div class="stat-title">Meu Amor 💙</div>
           <div id="mariaMessages" class="stat-number">0</div>
+          <div id="mariaPercent" class="stat-desc">0% do total</div>
         </div>
-        <div id="lastUpdated" class="last-updated"></div>
       </div>
+    </div>
 
-      <div id="highlightsBox" class="highlights-box">
-        <div class="section-header">
-          <div class="section-title">💖 Declarações Encontradas no Histórico:</div>
-          <button class="btn-fullscreen" onclick="toggleFullscreen('highlightsBox')">⛶ Tela Cheia</button>
+    <!-- ABAS DE NAVEGAÇÃO -->
+    <div id="tabsNav" class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('analyticsTab')">📊 Análises & Gráficos</button>
+      <button class="tab-btn" onclick="switchTab('memoriesTab')">✨ Recordações & Curiosidades</button>
+      <button class="tab-btn" onclick="switchTab('quizTab')">🎮 Quiz do Casal</button>
+      <button class="tab-btn" onclick="switchTab('chatTab')">💬 Histórico & Busca</button>
+      <button class="tab-btn" onclick="exportWrappedCard()">🎁 Gerar Card (Wrapped)</button>
+    </div>
+
+    <!-- ABA 1: ANÁLISES & GRÁFICOS -->
+    <div id="analyticsTab" class="tab-content">
+      <div class="card">
+        <div class="section-title" style="margin-bottom: 12px;">📈 Nossa História em Gráficos</div>
+        <div class="charts-wrapper">
+          <div class="chart-box">
+            <canvas id="timeSeriesChart"></canvas>
+          </div>
+          <div class="chart-box">
+            <canvas id="hourlyChart"></canvas>
+          </div>
         </div>
-        <div id="highlightsList" class="highlights-list"></div>
       </div>
+    </div>
 
-      <div id="chatSection" class="chat-section">
+    <!-- ABA 2: RECORDAÇÕES E CURIOSIDADES -->
+    <div id="memoriesTab" class="tab-content">
+      <div class="card">
+        <div id="memoryLaneBox" class="memory-card">
+          <div class="section-title">📅 Neste Dia na Nossa História</div>
+          <p id="memoryLaneSub" style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Carregando mensagens antigas trocadas no dia de hoje...</p>
+          <div id="memoryLaneContent" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+
+        <div class="charts-wrapper">
+          <div class="chart-box">
+            <div class="section-title" style="margin-bottom: 8px;">🏆 Recordes do Casal</div>
+            <div id="recordsContent" style="font-size: 0.85rem; display: flex; flex-direction: column; gap: 8px;"></div>
+          </div>
+          <div class="chart-box">
+            <div class="section-title" style="margin-bottom: 8px;">☁️ Palavras Mais Usadas</div>
+            <div id="wordCloudBox" class="cloud-box"></div>
+          </div>
+        </div>
+
+        <div class="chart-box" style="margin-top: 12px;">
+          <div class="section-title" style="margin-bottom: 8px;">😍 Duelo de Emojis mais Usados</div>
+          <div id="emojiRankBox" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.85rem;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA 3: QUIZ DO CASAL -->
+    <div id="quizTab" class="tab-content">
+      <div class="card">
+        <div class="quiz-card">
+          <div class="section-title" style="margin-bottom: 8px;">🎮 Quem Sabe Mais Sobre o Nosso Chat?</div>
+          <p id="quizScore" style="font-size: 0.8rem; font-weight: bold; color: var(--primary);">Pontuação: 0</p>
+          <div id="quizQuestion" style="font-size: 1rem; font-weight: bold; margin: 16px 0;">Carregando pergunta...</div>
+          <div id="quizOptions" class="quiz-options"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA 4: CHAT COMPLETO E BUSCA -->
+    <div id="chatTab" class="tab-content">
+      <div class="card" id="chatSection">
         <div class="section-header">
-          <div class="section-title">💬 Histórico Completo de Conversas:</div>
-          <button class="btn-fullscreen" onclick="toggleFullscreen('chatSection')">⛶ Tela Cheia</button>
+          <div class="section-title">💬 Histórico Completo:</div>
+          <button class="btn" onclick="toggleFullscreen('chatSection')">⛶ Tela Cheia</button>
         </div>
 
         <div class="chat-controls">
@@ -272,23 +302,16 @@
               <span class="search-icon">🔍</span>
               <input type="text" id="searchInput" placeholder="Pesquisar termo no chat...">
             </div>
-
-            <div id="searchCounter" class="search-counter-badge" style="display:none;">
-              0 resultados
-            </div>
+            <div id="searchCounter" class="btn" style="background: var(--primary); color:#fff; display:none;">0 resultados</div>
 
             <div class="tags-container">
-              <button class="tag-menu-btn" onclick="toggleTagsMenu(event)">🏷️ Tags <span style="font-size:0.7rem">▼</span></button>
+              <button class="btn" onclick="toggleTagsMenu(event)">🏷️ Tags <span style="font-size:0.7rem">▼</span></button>
               <div id="tagsPopover" class="tags-popover">
                 <button class="tag-item" onclick="applyTag('te amo')">❤️ Te Amo</button>
                 <button class="tag-item" onclick="applyTag('saudade')">🥺 Saudades</button>
                 <button class="tag-item" onclick="applyTag('bom dia')">☀️ Bom dia</button>
                 <button class="tag-item" onclick="applyTag('boa noite')">🌙 Boa noite</button>
                 <button class="tag-item" onclick="applyTag('meu amor')">💖 Meu Amor</button>
-                <button class="tag-item" onclick="applyTag('vida')">🥰 Vida</button>
-                <button class="tag-item" onclick="applyTag('linda')">😍 Linda/o</button>
-                <button class="tag-item" onclick="applyTag('beijo')">😘 Beijos</button>
-                <button class="tag-item" onclick="applyTag('sonho')">✨ Sonho</button>
                 <button class="tag-item" onclick="applyTag('fome')">🍕 Fome</button>
               </div>
             </div>
@@ -297,30 +320,60 @@
           <div class="date-row">
             <label>De: <input type="date" id="dateStart"></label>
             <label>Até: <input type="date" id="dateEnd"></label>
-            <button class="btn-fullscreen" style="margin-left:auto" onclick="clearFilters()">🔄 Limpar</button>
+            <button class="btn" style="margin-left:auto" onclick="clearFilters()">🔄 Limpar</button>
           </div>
         </div>
 
         <div id="chatFeed" class="chat-feed"></div>
       </div>
     </div>
+
+    <!-- CARD ESTÉTICO PARA EXPORTAÇÃO (SPOTIFY WRAPPED) -->
+    <div id="exportCard">
+      <h2>Nosso Histórico de Amor ❤️</h2>
+      <p id="wrappedDateRange">Estatísticas do nosso relacionamento</p>
+      <div class="wrapped-grid">
+        <div class="wrapped-item">
+          <span>Total de Mensagens</span>
+          <span class="wrapped-val" id="wrapTotal">0</span>
+        </div>
+        <div class="wrapped-item">
+          <span>"Te Amo" Trocados</span>
+          <span class="wrapped-val" id="wrapLove">0</span>
+        </div>
+        <div class="wrapped-item">
+          <span>Dia mais Ativo</span>
+          <span class="wrapped-val" id="wrapTopDay" style="font-size: 0.8rem;">-</span>
+        </div>
+        <div class="wrapped-item">
+          <span>Mago do Bom Dia</span>
+          <span class="wrapped-val" id="wrapBomDia" style="font-size: 0.85rem;">-</span>
+        </div>
+      </div>
+      <p style="font-size: 0.75rem; opacity: 0.7;">Gerado exclusivamente com o nosso histórico do WhatsApp 🥰</p>
+    </div>
+
   </div>
 
   <script>
     let parsedMessages = [];
     let filteredMessages = [];
+    let mediaFiles = {}; // Guarda blobs de midias se vier zip
     let currentPage = 1;
     const PAGE_SIZE = 100;
 
-    // --- REGEX PRECISA PARA DECLARAÇÕES DE AMOR ---
+    let timeChartInstance = null;
+    let hourlyChartInstance = null;
+    let quizCurrentQuestion = null;
+    let quizScorePoints = 0;
+
+    // REGEX DE AMOR RIGOROSA
     const patternEU = /(?:e+u+[\s,]*)/.source;
     const patternTE_TI = /[tt]+[ei]+/.source;
     const patternAMO = /a+m+o+/.source;
     const patternVOCE = /(?:v+o*c+[eê]*|v+c+)/.source;
-
     const patternTE_AMO = new RegExp(`\\b(?:${patternEU})?${patternTE_TI}[\\s,]+${patternAMO}\\b`, 'gi');
     const patternAMO_VOCE = new RegExp(`\\b${patternAMO}[\\s,]+(?:${patternEU})?${patternVOCE}\\b`, 'gi');
-
     const masterLoveRegex = new RegExp(`${patternTE_AMO.source}|${patternAMO_VOCE.source}`, 'gi');
 
     const statusEl = document.getElementById('status');
@@ -341,7 +394,6 @@
     function hideProgress() {
       progressContainer.style.display = 'none';
       progressBar.style.width = '0%';
-      progressText.innerText = '0%';
     }
 
     function showStatus(msg, isError = false) {
@@ -350,40 +402,67 @@
       else statusEl.classList.remove('error-text');
     }
 
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      
+      const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+      if (btn) btn.classList.add('active');
+    }
+
     document.getElementById('fileInput').addEventListener('change', async function(e) {
       const file = e.target.files[0];
       if (!file) return;
 
       document.getElementById('dropzoneText').innerText = `📄 ${file.name}`;
       showStatus("Lendo arquivo local...");
-      await updateProgress(20, "Lendo arquivo");
+      await updateProgress(10, "Lendo arquivo");
 
       try {
         let rawText = "";
+        mediaFiles = {};
+
         if (file.name.endsWith('.zip')) {
           const zip = new JSZip();
           const zipContent = await zip.loadAsync(file);
-          const txtFile = Object.keys(zipContent.files).find(name => name.endsWith('.txt'));
-          if (!txtFile) {
+          const txtFileName = Object.keys(zipContent.files).find(name => name.endsWith('.txt'));
+          
+          if (!txtFileName) {
             showStatus("Arquivo .txt não encontrado dentro do .zip", true);
             hideProgress();
             return;
           }
-          rawText = await zipContent.files[txtFile].async('string');
+
+          rawText = await zipContent.files[txtFileName].async('string');
+
+          // Mapear midias se existirem
+          const totalFiles = Object.keys(zipContent.files).length;
+          let loaded = 0;
+          for (let fileName in zipContent.files) {
+            if (!fileName.endsWith('.txt') && !zipContent.files[fileName].dir) {
+              const blob = await zipContent.files[fileName].async('blob');
+              mediaFiles[fileName] = URL.createObjectURL(blob);
+            }
+            loaded++;
+            if (loaded % 20 === 0) await updateProgress(10 + (loaded/totalFiles)*40, "Carregando Mídias");
+          }
+
         } else {
           rawText = await file.text();
         }
 
         await updateProgress(60, "Processando mensagens");
-        showStatus("Organizando histórico...");
-
         parseWhatsAppText(rawText);
-        renderDashboard();
 
-        const now = new Date();
-        const dateFormatted = now.toLocaleDateString('pt-BR');
-        const timeFormatted = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-        document.getElementById('lastUpdated').innerText = `Arquivo carregado em ${dateFormatted} às ${timeFormatted}`;
+        await updateProgress(80, "Gerando estatísticas");
+        renderDashboard();
+        generateCharts();
+        generateMemoriesAndRecords();
+        generateQuizQuestion();
+
+        document.getElementById('tabsNav').style.display = 'flex';
+        switchTab('analyticsTab');
 
         showStatus("");
         hideProgress();
@@ -406,8 +485,7 @@
 
         if (match) {
           const content = match[4].trim();
-          if (/<mídia\s+oculta>|<arquivo\s+de\s+mídia\s+oculto>|<media\s+omitted>/gi.test(content)) continue;
-
+          
           const dateParts = match[1].split(/[\/\.-]/);
           let isoDate = "";
           if (dateParts.length === 3) {
@@ -417,71 +495,268 @@
             isoDate = `${year}-${month}-${day}`;
           }
 
+          // Extrai hora numerica
+          let hour = 0;
+          const timeMatch = match[2].match(/(\d{1,2}):(\d{2})/);
+          if (timeMatch) hour = parseInt(timeMatch[1], 10);
+
           parsedMessages.push({
-            date: isoDate, dateRaw: match[1], time: match[2],
+            date: isoDate, dateRaw: match[1], time: match[2], hour: hour,
             author: match[3].trim(), content: content
           });
         } else if (parsedMessages.length > 0) {
           const extraLine = line.trim();
-          if (extraLine && !/<mídia\s+oculta>|<arquivo\s+de\s+mídia\s+oculto>|<media\s+omitted>/gi.test(extraLine)) {
+          if (extraLine) {
             parsedMessages[parsedMessages.length - 1].content += "\n" + extraLine;
           }
         }
       }
     }
 
+    function isFabricio(author) {
+      const name = author.toLowerCase();
+      return name.includes('fabricio') || name.includes('fabrício');
+    }
+
     function renderDashboard() {
-      let loveCount = 0; 
+      let loveCount = 0;
       let fabricioCount = 0;
       let mariaCount = 0;
-      const loveMessages = [];
 
       parsedMessages.forEach(msg => {
-        if (isFabricio(msg.author)) {
-          fabricioCount++;
-        } else {
-          mariaCount++;
-        }
+        if (isFabricio(msg.author)) fabricioCount++;
+        else mariaCount++;
 
         const matches = msg.content.match(masterLoveRegex);
-        if (matches) { 
-          loveCount += matches.length; 
-          loveMessages.push(msg); 
-        }
+        if (matches) loveCount += matches.length;
       });
 
+      const total = parsedMessages.length || 1;
       document.getElementById('counterNumber').innerText = loveCount;
       document.getElementById('totalMessages').innerText = parsedMessages.length;
       document.getElementById('fabricioMessages').innerText = fabricioCount;
       document.getElementById('mariaMessages').innerText = mariaCount;
+
+      document.getElementById('fabricioPercent').innerText = `${((fabricioCount/total)*100).toFixed(1)}% do total`;
+      document.getElementById('mariaPercent').innerText = `${((mariaCount/total)*100).toFixed(1)}% do total`;
+
       document.getElementById('statsGrid').style.display = 'grid';
-
-      const highlightsList = document.getElementById('highlightsList');
-      highlightsList.innerHTML = "";
-
-      loveMessages.forEach(msg => {
-        const highlightedContent = msg.content.replace(masterLoveRegex, match => `<span class="highlight">${match}</span>`);
-        const item = document.createElement('div');
-        item.className = `msg-bubble ${getAuthorClass(msg.author)}`;
-        item.innerHTML = `<div class="msg-header"><span>${escapeHTML(msg.author)}</span><span>${msg.dateRaw} ${msg.time}</span></div><div>${highlightedContent}</div>`;
-        highlightsList.appendChild(item);
-      });
-
-      document.getElementById('highlightsBox').style.display = 'block';
-      document.getElementById('chatSection').style.display = 'flex';
-
       applyFilters();
     }
 
+    /* GENERADOR DE GRÁFICOS (CHART.JS) */
+    function generateCharts() {
+      // 1. Evolução Mensal
+      const monthlyData = {};
+      const hoursData = Array(24).fill(0);
+
+      parsedMessages.forEach(msg => {
+        if (msg.date) {
+          const monthKey = msg.date.substring(0, 7); // YYYY-MM
+          if (!monthlyData[monthKey]) monthlyData[monthKey] = { fabricio: 0, maria: 0 };
+          if (isFabricio(msg.author)) monthlyData[monthKey].fabricio++;
+          else monthlyData[monthKey].maria++;
+        }
+        if (msg.hour >= 0 && msg.hour < 24) hoursData[msg.hour]++;
+      });
+
+      const monthsLabels = Object.keys(monthlyData).sort();
+      const fabricioMonthly = monthsLabels.map(m => monthlyData[m].fabricio);
+      const mariaMonthly = monthsLabels.map(m => monthlyData[m].maria);
+
+      if (timeChartInstance) timeChartInstance.destroy();
+      const ctx1 = document.getElementById('timeSeriesChart').getContext('2d');
+      timeChartInstance = new Chart(ctx1, {
+        type: 'line',
+        data: {
+          labels: monthsLabels,
+          datasets: [
+            { label: 'Fabricio 💜', data: fabricioMonthly, borderColor: '#6b21a8', backgroundColor: 'rgba(107,33,168,0.1)', fill: true, tension: 0.3 },
+            { label: 'Meu Amor 💙', data: mariaMonthly, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.3 }
+          ]
+        },
+        options: { responsive: true, plugins: { title: { display: true, text: 'Mensagens por Mês' } } }
+      });
+
+      if (hourlyChartInstance) hourlyChartInstance.destroy();
+      const ctx2 = document.getElementById('hourlyChart').getContext('2d');
+      hourlyChartInstance = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: Array.from({length: 24}, (_, i) => `${i}h`),
+          datasets: [{ label: 'Mensagens Trocadas', data: hoursData, backgroundColor: '#8c625d' }]
+        },
+        options: { responsive: true, plugins: { title: { display: true, text: 'Horários de Maior Conversa' } } }
+      });
+    }
+
+    /* RECORDAÇÕES & CURIOSIDADES */
+    function generateMemoriesAndRecords() {
+      const today = new Date();
+      const monthDay = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      
+      const memories = parsedMessages.filter(m => m.date && m.date.endsWith(monthDay));
+      const memoryContent = document.getElementById('memoryLaneContent');
+      memoryContent.innerHTML = "";
+
+      if (memories.length === 0) {
+        memoryContent.innerHTML = "<p style='font-size:0.8rem; opacity:0.8;'>Nenhuma mensagem encontrada neste mesmo dia em anos anteriores.</p>";
+      } else {
+        memories.slice(0, 5).forEach(m => {
+          const div = document.createElement('div');
+          div.className = `msg-bubble ${isFabricio(m.author) ? 'msg-fabricio' : 'msg-maria'}`;
+          div.innerHTML = `<div class="msg-header"><span>${escapeHTML(m.author)}</span><span>${m.dateRaw}</span></div><div>${escapeHTML(m.content)}</div>`;
+          memoryContent.appendChild(div);
+        });
+      }
+
+      // Recordes
+      const dateCounts = {};
+      let bomDiaFab = 0, bomDiaMar = 0;
+      const wordFreq = {};
+      const emojiFreqFab = {}, emojiFreqMar = {};
+      const emojiRegex = /(\p{Emoji_Presentation}|\p{Extended_Pictographic})/gu;
+
+      parsedMessages.forEach((m, idx) => {
+        // Dia com mais mensagens
+        dateCounts[m.dateRaw] = (dateCounts[m.dateRaw] || 0) + 1;
+
+        // Bom dia
+        if (/bom\s*dia/i.test(m.content)) {
+          if (isFabricio(m.author)) bomDiaFab++;
+          else bomDiaMar++;
+        }
+
+        // Palavras frequentes (limpando conectivos)
+        const words = m.content.toLowerCase().split(/\s+/);
+        words.forEach(w => {
+          const clean = w.replace(/[^\wáàâãéèêíóôõúç]/gi, '');
+          if (clean.length > 3 && !['que', 'para', 'como', 'mais', 'você', 'uma', 'este', 'essa', 'isso'].includes(clean)) {
+            wordFreq[clean] = (wordFreq[clean] || 0) + 1;
+          }
+        });
+
+        // Emojis
+        const emojis = m.content.match(emojiRegex);
+        if (emojis) {
+          emojis.forEach(e => {
+            if (isFabricio(m.author)) emojiFreqFab[e] = (emojiFreqFab[e] || 0) + 1;
+            else emojiFreqMar[e] = (emojiFreqMar[e] || 0) + 1;
+          });
+        }
+      });
+
+      let topDay = "-", maxMsgs = 0;
+      for (let d in dateCounts) {
+        if (dateCounts[d] > maxMsgs) { maxMsgs = dateCounts[d]; topDay = d; }
+      }
+
+      const recBox = document.getElementById('recordsContent');
+      recBox.innerHTML = `
+        <div>📌 <b>Dia mais ativo:</b> ${topDay} (${maxMsgs} mensagens)</div>
+        <div>☀️ <b>Primeiro Bom Dia:</b> Fabricio (${bomDiaFab}x) | Meu Amor (${bomDiaMar}x)</div>
+        <div>🏆 <b>Campeão do "Bom dia":</b> ${bomDiaFab > bomDiaMar ? 'Fabricio 💜' : 'Meu Amor 💙'}</div>
+      `;
+
+      // Nuvem de Palavras Top 15
+      const sortedWords = Object.entries(wordFreq).sort((a,b) => b[1] - a[1]).slice(0, 15);
+      const cloudBox = document.getElementById('wordCloudBox');
+      cloudBox.innerHTML = sortedWords.map(([w, c]) => `<span class="word-chip">${w} <span class="word-count">${c}</span></span>`).join('');
+
+      // Top Emojis
+      const topEmojiFab = Object.entries(emojiFreqFab).sort((a,b) => b[1] - a[1]).slice(0, 5);
+      const topEmojiMar = Object.entries(emojiFreqMar).sort((a,b) => b[1] - a[1]).slice(0, 5);
+
+      const emojiBox = document.getElementById('emojiRankBox');
+      emojiBox.innerHTML = `
+        <div>
+          <b>Fabricio 💜</b><br>
+          ${topEmojiFab.map(([e, c]) => `${e} (${c})`).join(' ')}
+        </div>
+        <div>
+          <b>Meu Amor 💙</b><br>
+          ${topEmojiMar.map(([e, c]) => `${e} (${c})`).join(' ')}
+        </div>
+      `;
+    }
+
+    /* QUIZ AUTOMÁTICO */
+    function generateQuizQuestion() {
+      if (parsedMessages.length === 0) return;
+
+      const qBox = document.getElementById('quizQuestion');
+      const optBox = document.getElementById('quizOptions');
+      optBox.innerHTML = "";
+
+      const types = ['love', 'bomdia', 'total'];
+      const chosen = types[Math.floor(Math.random() * types.length)];
+
+      if (chosen === 'love') {
+        let fab = 0, mar = 0;
+        parsedMessages.forEach(m => {
+          const match = m.content.match(masterLoveRegex);
+          if (match) {
+            if (isFabricio(m.author)) fab += match.length;
+            else mar += match.length;
+          }
+        });
+        const correct = fab > mar ? "Fabricio 💜" : "Meu Amor 💙";
+        
+        qBox.innerText = "Quem disse 'Te Amo' mais vezes na história do chat?";
+        quizCurrentQuestion = correct;
+
+        createQuizButton("Fabricio 💜");
+        createQuizButton("Meu Amor 💙");
+      } else if (chosen === 'bomdia') {
+        let fab = 0, mar = 0;
+        parsedMessages.forEach(m => {
+          if (/bom\s*dia/i.test(m.content)) {
+            if (isFabricio(m.author)) fab++; else mar++;
+          }
+        });
+        const correct = fab > mar ? "Fabricio 💜" : "Meu Amor 💙";
+
+        qBox.innerText = "Quem manda mais 'Bom dia' no dia a dia?";
+        quizCurrentQuestion = correct;
+
+        createQuizButton("Fabricio 💜");
+        createQuizButton("Meu Amor 💙");
+      } else {
+        const total = parsedMessages.length;
+        qBox.innerText = `Aproximadamente quantas mensagens já trocamos?`;
+        quizCurrentQuestion = `${total}`;
+
+        createQuizButton(`${total}`);
+        createQuizButton(`${Math.round(total * 0.7)}`);
+        createQuizButton(`${Math.round(total * 1.3)}`);
+        createQuizButton(`${Math.round(total * 1.5)}`);
+      }
+    }
+
+    function createQuizButton(text) {
+      const btn = document.createElement('button');
+      btn.className = 'quiz-btn';
+      btn.innerText = text;
+      btn.onclick = () => checkQuizAnswer(text);
+      document.getElementById('quizOptions').appendChild(btn);
+    }
+
+    function checkQuizAnswer(selected) {
+      if (selected === quizCurrentQuestion) {
+        quizScorePoints += 10;
+        alert("🎉 Resposta Correta! +10 pontos");
+      } else {
+        alert(`❌ Ops! A resposta certa era: ${quizCurrentQuestion}`);
+      }
+      document.getElementById('quizScore').innerText = `Pontuação: ${quizScorePoints}`;
+      generateQuizQuestion();
+    }
+
+    /* FILTROS E PESQUISA NO CHAT */
     function buildSearchRegex(term) {
       if (term === 'te amo') return masterLoveRegex;
-      
-      // Se a palavra for curta (< 4 letras), busca exata simples. Se maior, usa fronteira de palavra.
       const safeTerm = escapeRegExp(term);
-      if (term.length < 4) {
-        return new RegExp(safeTerm, 'gi');
-      }
-      return new RegExp(`\\b${safeTerm}\\b`, 'gi');
+      return term.length < 4 ? new RegExp(safeTerm, 'gi') : new RegExp(`\\b${safeTerm}\\b`, 'gi');
     }
 
     function applyFilters() {
@@ -514,11 +789,9 @@
         return false;
       });
 
-      // Atualiza o contador flutuante da busca
       if (searchTerm || dateStart || dateEnd) {
-        searchCounterEl.style.display = 'flex';
-        const label = searchTerm ? 'ocorrência(s)' : 'mensagem(ns)';
-        searchCounterEl.innerText = `${totalOccurrences} ${label}`;
+        searchCounterEl.style.display = 'inline-flex';
+        searchCounterEl.innerText = `${totalOccurrences} ${searchTerm ? 'ocorrência(s)' : 'mensagem(ns)'}`;
       } else {
         searchCounterEl.style.display = 'none';
       }
@@ -543,14 +816,26 @@
 
       pageItems.forEach(msg => {
         const item = document.createElement('div');
-        item.className = `msg-bubble ${getAuthorClass(msg.author)}`;
+        item.className = `msg-bubble ${isFabricio(msg.author) ? 'msg-fabricio' : 'msg-maria'}`;
 
         let displayContent = escapeHTML(msg.content);
         if (searchTerm && activeRegex) {
           displayContent = displayContent.replace(activeRegex, match => `<span class="highlight">${match}</span>`);
         }
 
-        item.innerHTML = `<div class="msg-header"><span>${escapeHTML(msg.author)}</span><span>${msg.dateRaw} ${msg.time}</span></div><div>${displayContent}</div>`;
+        // Anexo de midias (se zip)
+        let mediaHTML = "";
+        for (let fileName in mediaFiles) {
+          if (msg.content.includes(fileName)) {
+            if (fileName.endsWith('.opus') || fileName.endsWith('.m4a') || fileName.endsWith('.mp3')) {
+              mediaHTML += `<audio controls src="${mediaFiles[fileName]}"></audio>`;
+            } else if (fileName.endsWith('.jpg') || fileName.endsWith('.png') || fileName.endsWith('.jpeg')) {
+              mediaHTML += `<img class="media-img" src="${mediaFiles[fileName]}"/>`;
+            }
+          }
+        }
+
+        item.innerHTML = `<div class="msg-header"><span>${escapeHTML(msg.author)}</span><span>${msg.dateRaw} ${msg.time}</span></div><div>${displayContent}</div>${mediaHTML}`;
         chatFeed.appendChild(item);
       });
 
@@ -563,20 +848,34 @@
       }
     }
 
+    /* EXPORTAR CARD ESTÉTICO (WRAPPED) */
+    function exportWrappedCard() {
+      const card = document.getElementById('exportCard');
+      card.style.display = 'block';
+
+      document.getElementById('wrapTotal').innerText = parsedMessages.length;
+      document.getElementById('wrapLove').innerText = document.getElementById('counterNumber').innerText;
+      
+      const recordsText = document.getElementById('recordsContent').innerText;
+      const topDayMatch = recordsText.match(/Dia mais ativo:\s*([^\(]+)/);
+      if (topDayMatch) document.getElementById('wrapTopDay').innerText = topDayMatch[1].trim();
+
+      const bomDiaMatch = recordsText.match(/Campeão do "Bom dia":\s*(.+)/);
+      if (bomDiaMatch) document.getElementById('wrapBomDia').innerText = bomDiaMatch[1].trim();
+
+      html2canvas(card).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'nosso-historico-de-amor.png';
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    }
+
     function toggleFullscreen(elementId) { document.getElementById(elementId).classList.toggle('fullscreen-mode'); }
     function toggleTagsMenu(e) { e.stopPropagation(); document.getElementById('tagsPopover').classList.toggle('active'); }
     document.addEventListener('click', () => { const p = document.getElementById('tagsPopover'); if (p) p.classList.remove('active'); });
     function applyTag(tag) { document.getElementById('searchInput').value = tag; document.getElementById('tagsPopover').classList.remove('active'); applyFilters(); }
     function clearFilters() { document.getElementById('searchInput').value = ""; document.getElementById('dateStart').value = ""; document.getElementById('dateEnd').value = ""; applyFilters(); }
-
-    function isFabricio(author) {
-      const name = author.toLowerCase();
-      return name.includes('fabricio') || name.includes('fabrício');
-    }
-
-    function getAuthorClass(author) {
-      return isFabricio(author) ? 'msg-fabricio' : 'msg-maria';
-    }
 
     function escapeHTML(str) { return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&#34;' }[tag] || tag)); }
     function escapeRegExp(string) { return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
