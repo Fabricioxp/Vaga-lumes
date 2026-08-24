@@ -76,7 +76,6 @@
     .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #a68580, #8c625d); transition: width 0.15s linear; border-radius: 12px; }
     .progress-text { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; color: #ffffff; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
 
-    /* STATS GRID RESPONSIVO */
     .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; display: none; }
     @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr; } }
@@ -105,7 +104,6 @@
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-primary:hover { background: #734f4b; }
 
-    /* NAVEGAÇÃO DE ABAS */
     .tabs-nav { display: none; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
     .tab-btn {
       padding: 8px 14px; border-radius: 12px; border: 1px solid var(--border-color);
@@ -117,27 +115,22 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* GRÁFICOS */
     .charts-wrapper { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px; }
     @media (max-width: 650px) { .charts-wrapper { grid-template-columns: 1fr; } }
     .chart-box { background: #fffbfb; border: 1px solid var(--border-color); border-radius: 14px; padding: 12px; width: 100%; }
 
-    /* NUVEM DE PALAVRAS & EMOJIS */
     .cloud-box { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; padding: 10px; }
     .word-chip { background: #ffffff; border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 8px; font-size: 0.8rem; display: flex; align-items: center; gap: 4px; }
     .word-count { font-weight: bold; color: var(--primary); font-size: 0.75rem; }
 
-    /* RECORDAÇÃO DO DIA */
     .memory-card { background: #fffbfb; border: 1px dashed var(--primary); border-radius: 14px; padding: 14px; margin-bottom: 16px; }
 
-    /* QUIZ */
     .quiz-card { background: #fffbfb; border: 1px solid var(--border-color); border-radius: 14px; padding: 16px; text-align: center; }
     .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
     @media (max-width: 480px) { .quiz-options { grid-template-columns: 1fr; } }
     .quiz-btn { background: #fff; border: 1px solid var(--border-color); padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; color: var(--text-color); }
     .quiz-btn:hover { background: var(--primary); color: #fff; }
 
-    /* FEED E MENSAGENS */
     .chat-controls { display: flex; flex-direction: column; gap: 10px; background: #fffbfb; padding: 12px; border-radius: 14px; border: 1px solid var(--border-color); margin-bottom: 12px; }
     .search-row { display: flex; gap: 8px; align-items: center; position: relative; flex-wrap: wrap; }
     .input-wrapper { position: relative; flex: 1; min-width: 180px; }
@@ -161,7 +154,6 @@
     .highlight { background-color: #fef08a; color: #854d0e; font-weight: bold; padding: 1px 3px; border-radius: 3px; }
     .load-more-btn { background: var(--primary); color: #ffffff; border: none; padding: 8px 14px; border-radius: 12px; cursor: pointer; margin: 8px 0; font-size: 0.8rem; font-weight: bold; align-self: center; }
 
-    /* ESTILOS E FORMATOS DO WRAPPED */
     .wrap-story { width: 340px; min-height: 600px; }
     .wrap-square { width: 420px; min-height: 420px; }
     .wrap-landscape { width: 550px; min-height: 310px; }
@@ -209,10 +201,9 @@
 <body>
 
   <div class="container">
-    <!-- CARREGADOR DE ARQUIVO E PRIVACIDADE -->
     <div class="card">
       <div style="background: rgba(140, 98, 93, 0.08); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 10px; font-size: 0.75rem; text-align: center; margin-bottom: 12px;">
-        💖 <b>Estatísticas:</b> Ver nossas Estatísticas das mensagens.
+        🔒 <b>Privacidade Garantida:</b> Suas conversas e mídias são processadas 100% localmente no seu navegador. Nenhum dado é enviado para servidores.
       </div>
 
       <div class="file-dropzone" id="dropzoneBox">
@@ -227,7 +218,6 @@
         <div id="progressText" class="progress-text">0%</div>
       </div>
 
-      <!-- DASHBOARD DE METRICAS CHAVE -->
       <div id="statsGrid" class="stats-grid">
         <div class="stat-card">
           <div class="stat-title">Declarações "Te Amo" ❤️</div>
@@ -252,7 +242,6 @@
       </div>
     </div>
 
-    <!-- ABAS DE NAVEGAÇÃO -->
     <div id="tabsNav" class="tabs-nav">
       <button class="tab-btn active" onclick="switchTab('analyticsTab')">📊 Análises & Gráficos</button>
       <button class="tab-btn" onclick="switchTab('memoriesTab')">✨ Recordações & Curiosidades</button>
@@ -262,7 +251,6 @@
       <button class="tab-btn" onclick="exportPDFReport()" style="margin-left: auto;">🖨️ PDF</button>
     </div>
 
-    <!-- ABA 1: ANÁLISES & GRÁFICOS -->
     <div id="analyticsTab" class="tab-content">
       <div class="card">
         <div class="section-title" style="margin-bottom: 12px;">📈 Nossa História em Gráficos</div>
@@ -277,7 +265,6 @@
       </div>
     </div>
 
-    <!-- ABA 2: RECORDAÇÕES E CURIOSIDADES -->
     <div id="memoriesTab" class="tab-content">
       <div class="card">
         <div id="memoryLaneBox" class="memory-card">
@@ -304,7 +291,6 @@
       </div>
     </div>
 
-    <!-- ABA 3: QUIZ DO CASAL -->
     <div id="quizTab" class="tab-content">
       <div class="card">
         <div class="quiz-card">
@@ -316,7 +302,6 @@
       </div>
     </div>
 
-    <!-- ABA 4: CHAT COMPLETO E BUSCA -->
     <div id="chatTab" class="tab-content">
       <div class="card" id="chatSection">
         <div class="section-header">
@@ -356,7 +341,6 @@
       </div>
     </div>
 
-    <!-- ABA 5: GERADOR DE WRAPPED (CARD PERSONALIZÁVEL) -->
     <div id="wrappedTab" class="tab-content">
       <div class="card">
         <div class="section-title" style="margin-bottom: 12px;">🎨 Personalizar Card (Wrapped)</div>
@@ -410,7 +394,7 @@
   <script>
     let parsedMessages = [];
     let filteredMessages = [];
-    let mediaFiles = {}; // Guarda blobs de midias se vier zip
+    let mediaFiles = {}; 
     let currentPage = 1;
     const PAGE_SIZE = 100;
 
@@ -419,7 +403,7 @@
     let quizCurrentQuestion = null;
     let quizScorePoints = 0;
 
-    // REGEX DE AMOR RIGOROSA
+    // REGEX DE AMOR RIGOROSA (MANTIDA INTACADA)
     const patternEU = /(?:e+u+[\s,]*)/.source;
     const patternTE_TI = /[tt]+[ei]+/.source;
     const patternAMO = /a+m+o+/.source;
@@ -427,6 +411,35 @@
     const patternTE_AMO = new RegExp(`\\b(?:${patternEU})?${patternTE_TI}[\\s,]+${patternAMO}\\b`, 'gi');
     const patternAMO_VOCE = new RegExp(`\\b${patternAMO}[\\s,]+(?:${patternEU})?${patternVOCE}\\b`, 'gi');
     const masterLoveRegex = new RegExp(`${patternTE_AMO.source}|${patternAMO_VOCE.source}`, 'gi');
+
+    // REGEX REGULAR QUE ACEITA INTENSIDADES DEMAIS PALAVRAS (EX: bommm diaaa, fooome)
+    function regexForTermWithIntensifiers(term) {
+      const cleanTerm = term.trim().toLowerCase();
+      
+      // Mapeamento especial para expressões compostas comuns
+      if (cleanTerm === 'bom dia') {
+        return /\bb+o+m+[\s,]+d+i+a*s*\b/gi;
+      }
+      if (cleanTerm === 'boa noite') {
+        return /\bb+o+a+[\s,]+n+o+i+t+e*s*\b/gi;
+      }
+      if (cleanTerm === 'meu amor') {
+        return /\bm+e+u+[\s,]+a+m+o+r+e*s*\b/gi;
+      }
+
+      // Para termos normais, permite repetição em cada caractere de letra
+      const pattern = cleanTerm.split('').map(char => {
+        if (/[a-zA-Zà-úÀ-Ú]/.test(char)) {
+          return `${escapeRegExp(char)}+`;
+        }
+        if (/\s/.test(char)) {
+          return '[\\s,]+';
+        }
+        return escapeRegExp(char);
+      }).join('');
+
+      return new RegExp(`\\b${pattern}\\b`, 'gi');
+    }
 
     const statusEl = document.getElementById('status');
     const progressContainer = document.getElementById('progressContainer');
@@ -666,11 +679,12 @@
       const wordFreq = {};
       const emojiFreqFab = {}, emojiFreqMar = {};
       const emojiRegex = /(\p{Emoji_Presentation}|\p{Extended_Pictographic})/gu;
+      const bomDiaRegex = regexForTermWithIntensifiers('bom dia');
 
       parsedMessages.forEach((m) => {
         dateCounts[m.dateRaw] = (dateCounts[m.dateRaw] || 0) + 1;
 
-        if (/bom\s*dia/i.test(m.content)) {
+        if (bomDiaRegex.test(m.content)) {
           if (isFabricio(m.author)) bomDiaFab++;
           else bomDiaMar++;
         }
@@ -724,7 +738,6 @@
       `;
     }
 
-    /* MOTOR DE QUIZ EXTENSÍVEL COM DEZENAS DE VARIAÇÕES */
     function generateQuizQuestion() {
       if (parsedMessages.length === 0) return;
 
@@ -756,8 +769,9 @@
       }
       else if (chosen === 'top_bomdia') {
         let fab = 0, mar = 0;
+        const bdRegex = regexForTermWithIntensifiers('bom dia');
         parsedMessages.forEach(m => {
-          if (/bom\s*dia/i.test(m.content)) { if (isFabricio(m.author)) fab++; else mar++; }
+          if (bdRegex.test(m.content)) { if (isFabricio(m.author)) fab++; else mar++; }
         });
         questionText = "Quem manda mais 'Bom Dia' no dia a dia?";
         correctAnswer = fab >= mar ? "Fabricio 💜" : "Meu Amor 💙";
@@ -765,8 +779,9 @@
       }
       else if (chosen === 'top_boanoite') {
         let fab = 0, mar = 0;
+        const bnRegex = regexForTermWithIntensifiers('boa noite');
         parsedMessages.forEach(m => {
-          if (/boa\s*noite/i.test(m.content)) { if (isFabricio(m.author)) fab++; else mar++; }
+          if (bnRegex.test(m.content)) { if (isFabricio(m.author)) fab++; else mar++; }
         });
         questionText = "Quem é o campeão do 'Boa Noite'?";
         correctAnswer = fab >= mar ? "Fabricio 💜" : "Meu Amor 💙";
@@ -795,8 +810,9 @@
       }
       else if (chosen === 'saudade_king') {
         let fab = 0, mar = 0;
+        const saudadeRegex = regexForTermWithIntensifiers('saudade');
         parsedMessages.forEach(m => {
-          if (/saudade/i.test(m.content)) { if (isFabricio(m.author)) fab++; else mar++; }
+          if (saudadeRegex.test(m.content)) { if (isFabricio(m.author)) fab++; else mar++; }
         });
         questionText = "Quem fala mais 'Saudade' no chat?";
         correctAnswer = fab >= mar ? "Fabricio 💜" : "Meu Amor 💙";
@@ -861,7 +877,6 @@
       generateQuizQuestion();
     }
 
-    /* WRAPPED DINÂMICO (FORMATOS, ESTILOS E CONTEÚDOS) */
     function updateWrappedPreview() {
       const format = document.getElementById('wrapFormat').value;
       const theme = document.getElementById('wrapTheme').value;
@@ -879,11 +894,15 @@
       let boaNoiteFab = 0, boaNoiteMar = 0;
       let saudadesCount = 0;
 
+      const bdRegex = regexForTermWithIntensifiers('bom dia');
+      const bnRegex = regexForTermWithIntensifiers('boa noite');
+      const sdRegex = regexForTermWithIntensifiers('saudade');
+
       parsedMessages.forEach(m => {
         if (isFabricio(m.author)) fabMsgs++; else marMsgs++;
-        if (/bom\s*dia/i.test(m.content)) { if (isFabricio(m.author)) bomDiaFab++; else bomDiaMar++; }
-        if (/boa\s*noite/i.test(m.content)) { if (isFabricio(m.author)) boaNoiteFab++; else boaNoiteMar++; }
-        if (/saudade/i.test(m.content)) saudadesCount++;
+        if (bdRegex.test(m.content)) { if (isFabricio(m.author)) bomDiaFab++; else bomDiaMar++; }
+        if (bnRegex.test(m.content)) { if (isFabricio(m.author)) boaNoiteFab++; else boaNoiteMar++; }
+        if (sdRegex.test(m.content)) saudadesCount++;
       });
 
       let itemsHTML = "";
@@ -947,11 +966,9 @@
       });
     }
 
-    /* FILTROS E PESQUISA NO CHAT */
     function buildSearchRegex(term) {
       if (term === 'te amo') return masterLoveRegex;
-      const safeTerm = escapeRegExp(term);
-      return term.length < 4 ? new RegExp(safeTerm, 'gi') : new RegExp(`\\b${safeTerm}\\b`, 'gi');
+      return regexForTermWithIntensifiers(term);
     }
 
     function applyFilters() {
